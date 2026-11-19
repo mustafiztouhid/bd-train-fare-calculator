@@ -82,6 +82,28 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* Mobile UX & Typography Optimizations (Desktop untouched) */
+    html {
+      scroll-behavior: smooth;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (max-width: 640px) {
+      .eticket-table td {
+        padding: 4.5px 7px;
+        font-size: 0.78rem;
+        line-height: 1.3;
+      }
+      .eticket-header {
+        font-size: 0.95rem;
+        padding: 6px 10px;
+      }
+      /* Prevent iOS auto-zoom on select/input focus */
+      select, input[type="text"], input[type="number"] {
+        font-size: 16px !important;
+      }
+    }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
@@ -109,15 +131,15 @@
 <body class="min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-gradient-to-r from-[#004d35] via-[#006747] to-[#007a53] text-white shadow-md border-b-4 border-amber-500 sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <header class="bg-gradient-to-r from-[#004d35] via-[#006747] to-[#007a53] text-white shadow-md border-b-4 border-amber-500 static sm:sticky sm:top-0 z-30">
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center text-2xl shadow-inner border border-white/20 shrink-0">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center text-xl sm:text-2xl shadow-inner border border-white/20 shrink-0">
           🚆
         </div>
         <div>
           <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="text-lg sm:text-xl font-bold tracking-tight">বাংলাদেশ রেলওয়ে ই-টিকিট ক্যালকুলেটর</h1>
+            <h1 class="text-base sm:text-xl font-bold tracking-tight">বাংলাদেশ রেলওয়ে ই-টিকিট ক্যালকুলেটর</h1>
             <span class="bg-amber-400 text-slate-950 text-xs font-bold px-2.5 py-0.5 rounded-full">100% Exact Math</span>
             <span class="bg-emerald-900/80 text-emerald-200 text-xs font-semibold px-2 py-0.5 rounded-full border border-emerald-500/40">v2.0 মাল্টি-রুট</span>
           </div>
@@ -140,12 +162,12 @@
 
 
   <!-- Main Content -->
-  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 space-y-8">
+  <main class="max-w-7xl w-full mx-auto px-3.5 sm:px-6 py-4 sm:py-6 flex-1 space-y-6 sm:space-y-8 pb-20 lg:pb-8">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
       <!-- বাম কলাম: রুট, ট্রেন ও যাত্রী নির্বাচন (5 Cols on LG) -->
       <div class="lg:col-span-5 space-y-5">
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-4 sm:p-6">
           
           <!-- ১. করিডোর সুইচ ট্যাব (Corridor Selector Tabs) -->
           <div class="mb-4">
@@ -185,9 +207,9 @@
             </select>
           </div>
 
-          <!-- ৩. স্টেশন নির্বাচন ও কুইক চিপস (From & To Stations) -->
+          <!-- ৩. স্টেশন নির্বাচন (From & To Stations) -->
           <div class="mb-5">
-            <div class="grid grid-cols-1 sm:grid-cols-11 gap-2.5 items-end mb-2.5">
+            <div class="grid grid-cols-1 sm:grid-cols-11 gap-2 sm:gap-2.5 items-end mb-2.5">
               <div class="sm:col-span-5">
                 <label for="fromStation" class="block text-xs font-bold text-slate-700 mb-1">
                   কোথা থেকে (From Station)
@@ -195,8 +217,8 @@
                 <select id="fromStation" onchange="calculateFare()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none transition"></select>
               </div>
 
-              <div class="sm:col-span-1 flex justify-center">
-                <button type="button" onclick="swapStations()" title="স্টেশন অদলবদল করুন" class="w-full sm:w-10 h-10 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 font-bold text-base flex items-center justify-center transition shadow-2xs active:scale-95 cursor-pointer">
+              <div class="sm:col-span-1 flex justify-center py-1 sm:py-0">
+                <button type="button" onclick="swapStations()" title="স্টেশন অদলবদল করুন" class="w-10 h-10 rounded-full sm:rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 font-bold text-base flex items-center justify-center transition shadow-2xs active:scale-95 cursor-pointer rotate-90 sm:rotate-0">
                   ⇄
                 </button>
               </div>
@@ -216,56 +238,64 @@
               <label class="text-xs font-bold uppercase tracking-wide text-slate-700">আসন শ্রেণি (Seat Class)</label>
               <span class="text-xs text-slate-500">১ জন প্রাপ্তবয়স্কের প্রিভিউ</span>
             </div>
-            <div class="grid grid-cols-2 gap-2.5" id="classGrid">
+            <div class="grid grid-cols-2 gap-2 sm:gap-2.5" id="classGrid">
               <!-- S_CHAIR -->
-              <button type="button" onclick="selectClass('S_CHAIR')" id="cls-S_CHAIR" class="class-card text-left p-3 rounded-xl border-2 transition relative group cursor-pointer">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-sm text-slate-900">S_CHAIR</span>
-                  <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">০% ভ্যাট</span>
+              <button type="button" onclick="selectClass('S_CHAIR')" id="cls-S_CHAIR" class="class-card text-left p-2.5 sm:p-3 rounded-xl border-2 transition relative group cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="font-bold text-xs sm:text-sm text-slate-900">S_CHAIR</span>
+                    <span class="text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 shrink-0">০% ভ্যাট</span>
+                  </div>
+                  <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">শোভন চেয়ার (নন-এসি)</div>
                 </div>
-                <div class="text-xs text-slate-500 mt-0.5">শোভন চেয়ার (নন-এসি)</div>
-                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between">
-                  <span class="text-[11px] text-slate-500">একক কাউন্টার:</span>
-                  <span class="text-sm font-bold text-emerald-800 font-num" id="preview-S_CHAIR">৳০</span>
+                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between gap-1">
+                  <span class="text-[10px] sm:text-[11px] text-slate-500 shrink-0">একক কাউন্টার:</span>
+                  <span class="text-xs sm:text-sm font-bold text-emerald-800 font-num" id="preview-S_CHAIR">৳০</span>
                 </div>
               </button>
 
               <!-- SNIGDHA -->
-              <button type="button" onclick="selectClass('SNIGDHA')" id="cls-SNIGDHA" class="class-card text-left p-3 rounded-xl border-2 transition relative group cursor-pointer">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-sm text-slate-900">SNIGDHA</span>
-                  <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-800">১৫% ভ্যাট</span>
+              <button type="button" onclick="selectClass('SNIGDHA')" id="cls-SNIGDHA" class="class-card text-left p-2.5 sm:p-3 rounded-xl border-2 transition relative group cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="font-bold text-xs sm:text-sm text-slate-900">SNIGDHA</span>
+                    <span class="text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-800 shrink-0">১৫% ভ্যাট</span>
+                  </div>
+                  <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">স্নিগ্ধা (এসি চেয়ার)</div>
                 </div>
-                <div class="text-xs text-slate-500 mt-0.5">স্নিগ্ধা (এসি চেয়ার)</div>
-                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between">
-                  <span class="text-[11px] text-slate-500">ভ্যাটসহ একক:</span>
-                  <span class="text-sm font-bold text-emerald-800 font-num" id="preview-SNIGDHA">৳০</span>
+                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between gap-1">
+                  <span class="text-[10px] sm:text-[11px] text-slate-500 shrink-0">ভ্যাটসহ একক:</span>
+                  <span class="text-xs sm:text-sm font-bold text-emerald-800 font-num" id="preview-SNIGDHA">৳০</span>
                 </div>
               </button>
 
               <!-- AC_S -->
-              <button type="button" onclick="selectClass('AC_S')" id="cls-AC_S" class="class-card text-left p-3 rounded-xl border-2 transition relative group cursor-pointer">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-sm text-slate-900">AC_S</span>
-                  <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-800">১৫% ভ্যাট</span>
+              <button type="button" onclick="selectClass('AC_S')" id="cls-AC_S" class="class-card text-left p-2.5 sm:p-3 rounded-xl border-2 transition relative group cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="font-bold text-xs sm:text-sm text-slate-900">AC_S</span>
+                    <span class="text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-800 shrink-0">১৫% ভ্যাট</span>
+                  </div>
+                  <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">এসি সিট (কেবিন)</div>
                 </div>
-                <div class="text-xs text-slate-500 mt-0.5">এসি সিট (কেবিন)</div>
-                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between">
-                  <span class="text-[11px] text-slate-500">ভ্যাটসহ একক:</span>
-                  <span class="text-sm font-bold text-emerald-800 font-num" id="preview-AC_S">৳০</span>
+                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between gap-1">
+                  <span class="text-[10px] sm:text-[11px] text-slate-500 shrink-0">ভ্যাটসহ একক:</span>
+                  <span class="text-xs sm:text-sm font-bold text-emerald-800 font-num" id="preview-AC_S">৳০</span>
                 </div>
               </button>
 
               <!-- AC_B -->
-              <button type="button" onclick="selectClass('AC_B')" id="cls-AC_B" class="class-card text-left p-3 rounded-xl border-2 transition relative group cursor-pointer">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-sm text-slate-900">AC_B</span>
-                  <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900">+৫০৳ বেডিং</span>
+              <button type="button" onclick="selectClass('AC_B')" id="cls-AC_B" class="class-card text-left p-2.5 sm:p-3 rounded-xl border-2 transition relative group cursor-pointer flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="font-bold text-xs sm:text-sm text-slate-900">AC_B</span>
+                    <span class="text-[10px] sm:text-[11px] font-semibold px-1 sm:px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 shrink-0">+৫০৳ বেডিং</span>
+                  </div>
+                  <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">এসি বার্থ (স্লিপার)</div>
                 </div>
-                <div class="text-xs text-slate-500 mt-0.5">এসি বার্থ (স্লিপার)</div>
-                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between">
-                  <span class="text-[11px] text-slate-500">ভ্যাট+বেডিংসহ:</span>
-                  <span class="text-sm font-bold text-emerald-800 font-num" id="preview-AC_B">৳০</span>
+                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between gap-1">
+                  <span class="text-[10px] sm:text-[11px] text-slate-500 shrink-0">ভ্যাট+বেডিংসহ:</span>
+                  <span class="text-xs sm:text-sm font-bold text-emerald-800 font-num" id="preview-AC_B">৳০</span>
                 </div>
               </button>
             </div>
@@ -273,15 +303,15 @@
           </div>
 
           <!-- এক্সট্রা বগি (XTR Coach) টগল সুইচ -->
-          <div class="mb-5 p-3.5 bg-gradient-to-r from-amber-50 to-orange-50/70 rounded-2xl border-2 border-amber-300 shadow-xs flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-900 flex items-center justify-center text-lg font-bold shrink-0">
+          <div class="mb-5 p-3 sm:p-3.5 bg-gradient-to-r from-amber-50 to-orange-50/70 rounded-2xl border-2 border-amber-300 shadow-xs flex items-center justify-between gap-2.5 sm:gap-3">
+            <div class="flex items-center gap-2 sm:gap-2.5">
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/20 text-amber-900 flex items-center justify-center text-base sm:text-lg font-bold shrink-0">
                 ⚡
               </div>
               <div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <span class="text-xs sm:text-sm font-bold text-amber-950">এক্সট্রা বগি (XTR Coach)</span>
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">S_CHAIR +২০% | এসি +৩০%</span>
+                  <span class="text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">S_CHAIR +২০% | এসি +৩০%</span>
                 </div>
               </div>
             </div>
@@ -302,48 +332,48 @@
               <!-- Adult Counter -->
               <div class="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
                 <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-bold text-sm text-slate-900">প্রাপ্তবয়স্ক (Adult)</span>
-                    <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">১০০% মূল ভাড়া</span>
+                  <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="font-bold text-xs sm:text-sm text-slate-900">প্রাপ্তবয়স্ক (Adult)</span>
+                    <span class="text-[10px] sm:text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">১০০% মূল ভাড়া</span>
                   </div>
-                  <p class="text-xs text-slate-500 mt-0.5" id="unitTextAdult">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
+                  <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5" id="unitTextAdult">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
-                  <button type="button" onclick="updateCount('adult', -1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                  <button type="button" onclick="updateCount('adult', -1)" class="w-9 h-9 sm:w-8 sm:h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
                   <span id="adultCount" class="w-7 text-center font-bold text-base font-num text-slate-900">1</span>
-                  <button type="button" onclick="updateCount('adult', 1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
+                  <button type="button" onclick="updateCount('adult', 1)" class="w-9 h-9 sm:w-8 sm:h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
                 </div>
               </div>
 
               <!-- Child Counter -->
               <div class="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
                 <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-bold text-sm text-slate-900">শিশু (Child: ৩–১২ বছর)</span>
-                    <span class="text-[11px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold">৩৪% ছাড় (×0.66 ➔ 5)</span>
+                  <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="font-bold text-xs sm:text-sm text-slate-900">শিশু (Child: ৩–১২ বছর)</span>
+                    <span class="text-[10px] sm:text-[11px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold">৩৪% ছাড় (×0.66 ➔ 5)</span>
                   </div>
-                  <p class="text-xs text-slate-500 mt-0.5" id="unitTextChild">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
+                  <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5" id="unitTextChild">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
-                  <button type="button" onclick="updateCount('child', -1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                  <button type="button" onclick="updateCount('child', -1)" class="w-9 h-9 sm:w-8 sm:h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
                   <span id="childCount" class="w-7 text-center font-bold text-base font-num text-slate-900">0</span>
-                  <button type="button" onclick="updateCount('child', 1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
+                  <button type="button" onclick="updateCount('child', 1)" class="w-9 h-9 sm:w-8 sm:h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
                 </div>
               </div>
 
               <!-- Senior Citizen Counter -->
               <div class="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
                 <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-bold text-sm text-slate-900">প্রবীণ নাগরিক (Senior: ৬৫+)</span>
-                    <span class="text-[11px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-semibold" id="seniorBadge">২৫% ছাড়</span>
+                  <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="font-bold text-xs sm:text-sm text-slate-900">প্রবীণ নাগরিক (Senior: ৬৫+)</span>
+                    <span class="text-[10px] sm:text-[11px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-semibold" id="seniorBadge">২৫% ছাড়</span>
                   </div>
-                  <p class="text-xs text-slate-500 mt-0.5" id="unitTextSenior">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
+                  <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5" id="unitTextSenior">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
-                  <button type="button" onclick="updateCount('senior', -1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                  <button type="button" onclick="updateCount('senior', -1)" class="w-9 h-9 sm:w-8 sm:h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
                   <span id="seniorCount" class="w-7 text-center font-bold text-base font-num text-slate-900">0</span>
-                  <button type="button" onclick="updateCount('senior', 1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
+                  <button type="button" onclick="updateCount('senior', 1)" class="w-9 h-9 sm:w-8 sm:h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
                 </div>
                 <input type="hidden" id="seniorRuleSelect" value="GAZETTE_5">
               </div>
@@ -374,10 +404,10 @@
                       বসালে সিস্টেম স্বয়ংক্রিয়ভাবে মূল ভাড়া ও ভ্যাট ভেঙে দেবে এবং প্রতি আসনে ২০৳ সার্ভিস চার্জ যোগ করবে।
                     </p>
                   </div>
-                  <div class="flex items-center gap-1.5 shrink-0">
+                  <div class="flex items-center gap-1.5 w-full sm:w-auto justify-end sm:justify-start shrink-0">
                     <span class="text-sm font-bold text-slate-500 font-num">৳</span>
-                    <input type="number" id="customBaseInput" min="0" step="1" placeholder="যেমন: 1000" oninput="calculateFare()" class="w-28 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-num font-bold text-emerald-950 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none">
-                    <button type="button" onclick="clearCustomBase()" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold cursor-pointer transition">মুছুন</button>
+                    <input type="number" id="customBaseInput" min="0" step="1" placeholder="যেমন: 1000" oninput="calculateFare()" class="w-full sm:w-28 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-num font-bold text-emerald-950 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                    <button type="button" onclick="clearCustomBase()" class="text-xs px-3 py-2 sm:py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold cursor-pointer transition shrink-0">মুছুন</button>
                   </div>
                 </div>
 
@@ -392,9 +422,9 @@
       </div>
 
       <!-- ডান কলাম: অফিশিয়াল ই-টিকিট ভিউ ও গাণিতিক বিশ্লেষণ (7 Cols on LG) -->
-      <div class="lg:col-span-7 space-y-5">
+      <div class="lg:col-span-7 space-y-5" id="officialTicketSection">
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-4 sm:p-6">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div class="flex items-center gap-2">
               <span class="w-3 h-3 rounded-full bg-emerald-600"></span>
@@ -411,29 +441,29 @@
           <div class="eticket-box rounded-md shadow-xs border border-[#717171]">
             
             <!-- Official Header Replica matching GA-04.pdf -->
-            <div class="p-3 sm:p-4 bg-white border-b border-[#717171] flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5">
+            <div class="p-2.5 sm:p-4 bg-white border-b border-[#717171] flex items-center justify-between gap-2 sm:gap-3">
+              <div class="flex items-center gap-2 sm:gap-2.5">
                 <!-- Bangladesh Railway Crest Emblem -->
-                <div class="w-12 h-12 rounded-full border-2 border-emerald-800 bg-emerald-50/50 flex flex-col items-center justify-center text-center p-1 shadow-2xs shrink-0">
-                  <span class="text-xs font-bold text-emerald-900 leading-none">🚆</span>
-                  <span class="text-[7px] font-bold text-emerald-950 mt-0.5">রেলওয়ে</span>
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-emerald-800 bg-emerald-50/50 flex flex-col items-center justify-center text-center p-0.5 sm:p-1 shadow-2xs shrink-0">
+                  <span class="text-xs sm:text-sm font-bold text-emerald-900 leading-none">🚆</span>
+                  <span class="text-[6.5px] sm:text-[7px] font-bold text-emerald-950 mt-0.5">রেলওয়ে</span>
                 </div>
                 <div>
-                  <div class="text-[#005a9c] font-bold text-sm sm:text-base tracking-wide leading-tight font-sans">BANGLADESH RAILWAY</div>
-                  <div class="text-[#008542] font-bold text-xs sm:text-sm -mt-0.5">বাংলাদেশ রেলওয়ে</div>
+                  <div class="text-[#005a9c] font-bold text-xs sm:text-base tracking-wide leading-tight font-sans">BANGLADESH RAILWAY</div>
+                  <div class="text-[#008542] font-bold text-[11px] sm:text-sm -mt-0.5">বাংলাদেশ রেলওয়ে</div>
                 </div>
               </div>
 
               <!-- Shohoz JV & QR Code Badge -->
-              <div class="flex items-center gap-2 text-right shrink-0">
-                <div class="text-[9px] text-slate-500 leading-tight">
+              <div class="flex items-center gap-1.5 sm:gap-2 text-right shrink-0">
+                <div class="text-[8px] sm:text-[9px] text-slate-500 leading-tight">
                   <span class="block">Powered by</span>
-                  <span class="font-bold text-slate-900 text-[10px]">Shohoz</span><br>
+                  <span class="font-bold text-slate-900 text-[9px] sm:text-[10px]">Shohoz</span><br>
                   <span class="text-slate-700">Synesis</span><br>
                   <span class="text-slate-700">Vincen <strong class="text-emerald-700">JV</strong></span>
                 </div>
                 <!-- Mini QR Code SVG Replica -->
-                <div class="w-10 h-10 border border-slate-400 p-0.5 bg-white flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 border border-slate-400 p-0.5 bg-white flex items-center justify-center shrink-0">
                   <svg class="w-full h-full text-slate-900" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm10-2h8v8h-8V2zm2 2v4h4V4h-4zM2 14h8v8H2v-8zm2 2v4h4v-4H4zm14 0h4v4h-4v-4zm-4 4h4v2h-4v-2zm4-4h2v2h-2v-2zm-4-4h2v4h-2v-4zm6 2h2v4h-2v-4z"/>
                   </svg>
@@ -533,7 +563,7 @@
         </div>
 
         <!-- ফর্মুলা ও ব্রেকডাউন সেকশন -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-4 sm:p-6">
           <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
             <div>
               <h3 class="text-base font-bold text-slate-800">যাত্রীভিত্তিক সূক্ষ্ম বিশ্লেষণ ও গাণিতিক সূত্র (Formula Inspector)</h3>
@@ -546,7 +576,7 @@
 
           <!-- Granular Breakdown Table -->
           <div class="overflow-x-auto rounded-xl border border-slate-200 mb-4">
-            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <table class="w-full min-w-[500px] sm:min-w-full text-left border-collapse text-xs sm:text-sm">
               <thead>
                 <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
                   <th class="py-2.5 px-3 font-bold">যাত্রীর ধরন ও সংখ্যা</th>
@@ -576,7 +606,7 @@
     </div>
 
     <!-- নির্বাচিত রুটের সম্পূর্ণ অফিশিয়াল ভাড়ার চার্ট -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-6">
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-4 sm:p-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
         <div>
           <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -585,12 +615,12 @@
           <p class="text-xs text-slate-500">যেকোনো স্টেশনের পাশে <strong>"হিসাব করুন"</strong> বাটনে ক্লিক করলে তা সরাসরি ক্যালকুলেটরে সেট হয়ে যাবে</p>
         </div>
         <div class="flex items-center gap-2">
-          <input type="text" id="stationSearchInput" oninput="renderFullChart()" placeholder="স্টেশন খুঁজুন (যেমন: চট্টগ্রাম, কুমিল্লা, দিনাজপুর)..." class="w-full sm:w-64 rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm outline-none focus:border-emerald-600">
+          <input type="text" id="stationSearchInput" oninput="renderFullChart()" placeholder="স্টেশন খুঁজুন (যেমন: চট্টগ্রাম, কুমিল্লা, দিনাজপুর)..." class="w-full sm:w-64 rounded-xl border border-slate-300 px-3 py-2 text-base sm:text-sm outline-none focus:border-emerald-600">
         </div>
       </div>
 
       <div class="overflow-x-auto rounded-xl border border-slate-200">
-        <table class="w-full text-xs sm:text-sm border-collapse">
+        <table class="w-full min-w-[620px] sm:min-w-full text-xs sm:text-sm border-collapse">
           <thead>
             <tr class="bg-[#006747] text-white">
               <th class="py-3 px-3 text-center font-semibold">ক্র.</th>
@@ -609,27 +639,42 @@
     </section>
   </main>
 
+  <!-- মোবাইল ফ্লোটিং বটম বার (শুধুমাত্র মোবাইল/ট্যাবলেটে দৃশ্যমান, ডেস্কটপে সম্পূর্ণ লুকানো) -->
+  <div id="mobileBottomBar" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2.5 shadow-2xl z-40 flex items-center justify-between gap-3">
+    <div>
+      <div class="text-[10px] text-slate-500 font-medium">সর্বমোট ভাড়া (ভ্যাট ও চার্জসহ)</div>
+      <div class="text-base font-bold text-emerald-800 font-num flex items-baseline gap-1.5">
+        <span id="mobileBottomTotal">৳০</span>
+        <span class="text-[11px] font-normal text-slate-500" id="mobileBottomSeatCount">(১টি আসন)</span>
+      </div>
+    </div>
+    <button type="button" onclick="scrollToTicket()" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+      <span>টিকিট ভিউ</span>
+      <span>↓</span>
+    </button>
+  </div>
+
   <!-- অটো-টেস্ট মোডাল -->
-  <div id="testModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200">
-      <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+  <div id="testModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
         <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-          <span>✅ স্বয়ংক্রিয় ভাড়া ও ভ্যাট যাচাইকরণ রিপোর্ট (Automated QA Suite)</span>
+          <span>✅ স্বয়ংক্রিয় ভাড়া ও ভ্যাট যাচাইকরণ রিপোর্ট</span>
         </h3>
         <button onclick="toggleTestModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold cursor-pointer">✕</button>
       </div>
-      <p class="text-xs sm:text-sm text-slate-600 mb-4">
-        বাংলাদেশ রেলওয়ের অফিসিয়াল ই-টিকিট এবং আপনার দেওয়া স্ক্রিনশট ও মূল টিকিট মিলিয়ে মোট <strong>৯টি বেঞ্চমার্ক টেস্ট কেস (এক্সট্রা বগিসহ)</strong> স্বয়ংক্রিয়ভাবে পরীক্ষা করা হয়েছে:
+      <p class="text-xs sm:text-sm text-slate-600 mb-3">
+        বাংলাদেশ রেলওয়ের অফিসিয়াল ই-টিকিট ও মূল টিকিটের সাথে <strong>১১টি বেঞ্চমার্ক টেস্ট কেস (এক্সট্রা বগিসহ)</strong> স্বয়ংক্রিয়ভাবে পরীক্ষা করা হয়েছে:
       </p>
-      <div id="testResultsList" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
-      <div class="mt-5 pt-3 border-t border-slate-200 flex justify-end">
+      <div id="testResultsList" class="space-y-2.5 overflow-y-auto flex-1 pr-1"></div>
+      <div class="mt-4 pt-3 border-t border-slate-200 flex justify-end">
         <button onclick="toggleTestModal()" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-semibold cursor-pointer">বন্ধ করুন</button>
       </div>
     </div>
   </div>
 
   <!-- Toast notification -->
-  <div id="toastBox" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium transition-all duration-300 opacity-0 pointer-events-none translate-y-2 z-50">
+  <div id="toastBox" class="fixed bottom-16 sm:bottom-5 right-4 sm:right-5 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium transition-all duration-300 opacity-0 pointer-events-none translate-y-2 z-50">
     হিসাব কপি করা হয়েছে!
   </div>
 
@@ -1474,6 +1519,12 @@
       document.getElementById("etTotalFare").textContent =
         `BDT ${formatEnCurrency(summary.grandTotal)} (${formatBnCurrency(summary.grandTotal)} টাকা)`;
 
+      // মোবাইল ফ্লোটিং বটম বার আপডেট
+      const mTotal = document.getElementById("mobileBottomTotal");
+      const mSeats = document.getElementById("mobileBottomSeatCount");
+      if (mTotal) mTotal.textContent = `৳${formatBnInt(summary.grandTotal)}`;
+      if (mSeats) mSeats.textContent = `(${formatBnInt(summary.totalSeats)}টি আসন)`;
+
       document.getElementById("seatLimitAlert").classList.toggle("hidden", summary.totalSeats <= 4);
       document.getElementById("routeBadgeText").textContent =
         fromSt && toSt ? `${fromSt.bn.replace(/_/g, ' ')} ➔ ${toSt.bn.replace(/_/g, ' ')}` : "-";
@@ -1826,6 +1877,13 @@
 
       document.getElementById("testStatusText").textContent =
         `অটো-টেস্ট যাচাইকৃত (${toBnDigits(passedCount)}/${toBnDigits(testCases.length)} পাস)`;
+    }
+
+    function scrollToTicket() {
+      const el = document.getElementById("officialTicketSection");
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     function toggleTestModal() {
