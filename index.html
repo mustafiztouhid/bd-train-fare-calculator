@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>বাংলাদেশ রেলওয়ে ই-টিকিট ভাড়া ও ভ্যাট ক্যালকুলেটর (ঢাকা ↔ পঞ্চগড় ও ঢাকা ↔ কক্সবাজার)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.maateen.me/solaiman-lipi/font.css">
+  <style>
+    :root {
+      --br-green: #006747;
+      --br-green-dark: #004d35;
+      --br-emerald: #008251;
+    }
+
+    body {
+      font-family: 'SolaimanLipi', 'Hind Siliguri', 'Noto Sans Bengali', 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .font-num {
+      font-family: 'Inter', Arial, 'SolaimanLipi', sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Official E-Ticket Typography & Table Styling matching Bangladesh Railway PDF GA-04.pdf */
+    .eticket-box {
+      font-family: 'SolaimanLipi', 'Hind Siliguri', 'Noto Sans Bengali', Arial, sans-serif;
+      border: 1px solid #717171;
+      background: #ffffff;
+      overflow: hidden;
+      color: #000000;
+    }
+
+    .eticket-header {
+      background-color: #008542;
+      color: #ffffff;
+      padding: 7px 12px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.1px;
+    }
+
+    .eticket-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .eticket-table tr {
+      border-bottom: 1px solid #717171;
+    }
+
+    .eticket-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .eticket-table td {
+      padding: 5.5px 10px;
+      font-size: 0.85rem;
+      color: #000000;
+      line-height: 1.35;
+    }
+
+    .eticket-table td:first-child {
+      width: 47%;
+      border-right: 1px solid #717171;
+      font-weight: 500;
+      background-color: #ffffff;
+    }
+
+    .eticket-table td:last-child {
+      width: 53%;
+      font-weight: 400;
+    }
+
+    .font-ticket-num {
+      font-family: Arial, 'Inter', 'SolaimanLipi', sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .corridor-tab.active {
+      background: #ffffff;
+      color: #006747;
+      border-color: #006747;
+      box-shadow: 0 4px 6px -1px rgba(0, 103, 71, 0.1), 0 2px 4px -2px rgba(0, 103, 71, 0.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-[#004d35] via-[#006747] to-[#007a53] text-white shadow-md border-b-4 border-amber-500 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center text-2xl shadow-inner border border-white/20 shrink-0">
+          🚆
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight">বাংলাদেশ রেলওয়ে ই-টিকিট ক্যালকুলেটর</h1>
+            <span class="bg-amber-400 text-slate-950 text-xs font-bold px-2.5 py-0.5 rounded-full">100% Exact Math</span>
+            <span class="bg-emerald-900/80 text-emerald-200 text-xs font-semibold px-2 py-0.5 rounded-full border border-emerald-500/40">v2.0 মাল্টি-রুট</span>
+          </div>
+          <p class="text-xs sm:text-sm text-emerald-100">
+            ঢাকা ↔ পঞ্চগড় (একতা, দ্রুতযান, পঞ্চগড় এক্সপ্রেস) ও ঢাকা ↔ কক্সবাজার (পর্যটক, কক্সবাজার এক্সপ্রেস, মহানগর)
+          </p>
+        </div>
+      </div>
+
+      <!-- Self-Test Verification Status -->
+      <div class="flex items-center gap-2 self-start md:self-auto">
+        <button onclick="toggleTestModal()" id="testStatusBtn" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-950/80 border border-emerald-400/40 text-xs sm:text-sm font-medium transition cursor-pointer">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="testStatusText">অটো-টেস্ট যাচাইকৃত (১১/১১ পাস)</span>
+          <span class="text-emerald-300 underline ml-1">দেখুন</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- Main Content -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 space-y-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- বাম কলাম: রুট, ট্রেন ও যাত্রী নির্বাচন (5 Cols on LG) -->
+      <div class="lg:col-span-5 space-y-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-6">
+          
+          <!-- ১. করিডোর সুইচ ট্যাব (Corridor Selector Tabs) -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                <span>🧭</span> রুট / করিডোর নির্বাচন করুন
+              </label>
+              <button onclick="resetToDefault()" class="text-xs font-semibold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md transition">
+                রিসেট
+              </button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-xl border border-slate-200" id="corridorTabs">
+              <button type="button" onclick="selectCorridor('COXS_BAZAR')" id="tab-COXS_BAZAR" class="corridor-tab py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold text-center border transition flex flex-col items-center justify-center gap-0.5">
+                <span class="flex items-center gap-1">🌊 ঢাকা ↔ কক্সবাজার</span>
+                <span class="text-[11px] font-normal text-slate-500">পর্যটক • কক্সবাজার • মহানগর</span>
+              </button>
+              <button type="button" onclick="selectCorridor('PANCHAGARH')" id="tab-PANCHAGARH" class="corridor-tab py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold text-center border transition flex flex-col items-center justify-center gap-0.5">
+                <span class="flex items-center gap-1">🟢 ঢাকা ↔ পঞ্চগড়</span>
+                <span class="text-[11px] font-normal text-slate-500">একতা • দ্রুতযান • পঞ্চগড় এক্স.</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ২. ট্রেন নির্বাচন ড্রপডাউন -->
+          <div class="mb-5">
+            <div class="flex items-center justify-between mb-2">
+              <label for="trainSelect" class="text-xs font-bold uppercase tracking-wide text-slate-700">
+                ট্রেন নির্বাচন (সময়সূচী ও স্টপেজ)
+              </label>
+              <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md" id="activeTrainInfoBadge">
+                নির্বাচিত ট্রেন
+              </span>
+            </div>
+
+            <!-- ট্রেন সিলেক্ট ড্রপডাউন -->
+            <select id="trainSelect" onchange="handleTrainSelectChange()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none transition shadow-2xs">
+            </select>
+          </div>
+
+          <!-- ৩. স্টেশন নির্বাচন ও কুইক চিপস (From & To Stations) -->
+          <div class="mb-5">
+            <div class="grid grid-cols-1 sm:grid-cols-11 gap-2.5 items-end mb-2.5">
+              <div class="sm:col-span-5">
+                <label for="fromStation" class="block text-xs font-bold text-slate-700 mb-1">
+                  কোথা থেকে (From Station)
+                </label>
+                <select id="fromStation" onchange="calculateFare()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none transition"></select>
+              </div>
+
+              <div class="sm:col-span-1 flex justify-center">
+                <button type="button" onclick="swapStations()" title="স্টেশন অদলবদল করুন" class="w-full sm:w-10 h-10 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 font-bold text-base flex items-center justify-center transition shadow-2xs active:scale-95 cursor-pointer">
+                  ⇄
+                </button>
+              </div>
+
+              <div class="sm:col-span-5">
+                <label for="toStation" class="block text-xs font-bold text-slate-700 mb-1">
+                  কোথায় যাবেন (To Station)
+                </label>
+                <select id="toStation" onchange="calculateFare()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none transition"></select>
+              </div>
+            </div>
+
+            <!-- জনপ্রিয় স্টেশনগুলোর কুইক চিপস বাটন -->
+            <div>
+              <div class="text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
+                <span>📍</span> দ্রুত স্টেশন সেট করুন (Quick Chips):
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap" id="quickStationChips">
+                <!-- JS dynamically adds quick chips based on corridor -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ৪. আসন শ্রেণি (Seat Class) -->
+          <div class="mb-5">
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-bold uppercase tracking-wide text-slate-700">আসন শ্রেণি (Seat Class)</label>
+              <span class="text-xs text-slate-500">১ জন প্রাপ্তবয়স্কের প্রিভিউ</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5" id="classGrid">
+              <!-- S_CHAIR -->
+              <button type="button" onclick="selectClass('S_CHAIR')" id="cls-S_CHAIR" class="class-card text-left p-3 rounded-xl border-2 transition relative group cursor-pointer">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-sm text-slate-900">S_CHAIR</span>
+                  <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">০% ভ্যাট</span>
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">শোভন চেয়ার (নন-এসি)</div>
+                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between">
+                  <span class="text-[11px] text-slate-500">একক কাউন্টার:</span>
+                  <span class="text-sm font-bold text-emerald-800 font-num" id="preview-S_CHAIR">৳০</span>
+                </div>
+              </button>
+
+              <!-- SNIGDHA -->
+              <button type="button" onclick="selectClass('SNIGDHA')" id="cls-SNIGDHA" class="class-card text-left p-3 rounded-xl border-2 transition relative group cursor-pointer">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-sm text-slate-900">SNIGDHA</span>
+                  <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-800">১৫% ভ্যাট</span>
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">স্নিগ্ধা (এসি চেয়ার)</div>
+                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between">
+                  <span class="text-[11px] text-slate-500">ভ্যাটসহ একক:</span>
+                  <span class="text-sm font-bold text-emerald-800 font-num" id="preview-SNIGDHA">৳০</span>
+                </div>
+              </button>
+
+              <!-- AC_S -->
+              <button type="button" onclick="selectClass('AC_S')" id="cls-AC_S" class="class-card text-left p-3 rounded-xl border-2 transition relative group cursor-pointer">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-sm text-slate-900">AC_S</span>
+                  <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-100/80 text-emerald-800">১৫% ভ্যাট</span>
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">এসি সিট (কেবিন)</div>
+                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between">
+                  <span class="text-[11px] text-slate-500">ভ্যাটসহ একক:</span>
+                  <span class="text-sm font-bold text-emerald-800 font-num" id="preview-AC_S">৳০</span>
+                </div>
+              </button>
+
+              <!-- AC_B -->
+              <button type="button" onclick="selectClass('AC_B')" id="cls-AC_B" class="class-card text-left p-3 rounded-xl border-2 transition relative group cursor-pointer">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-sm text-slate-900">AC_B</span>
+                  <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900">+৫০৳ বেডিং</span>
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">এসি বার্থ (স্লিপার)</div>
+                <div class="mt-2 pt-1.5 border-t border-slate-200/70 flex items-baseline justify-between">
+                  <span class="text-[11px] text-slate-500">ভ্যাট+বেডিংসহ:</span>
+                  <span class="text-sm font-bold text-emerald-800 font-num" id="preview-AC_B">৳০</span>
+                </div>
+              </button>
+            </div>
+            <div id="classNote" class="text-[11px] text-slate-500 mt-1.5 hidden"></div>
+          </div>
+
+          <!-- এক্সট্রা বগি (XTR Coach) টগল সুইচ -->
+          <div class="mb-5 p-3.5 bg-gradient-to-r from-amber-50 to-orange-50/70 rounded-2xl border-2 border-amber-300 shadow-xs flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-900 flex items-center justify-center text-lg font-bold shrink-0">
+                ⚡
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs sm:text-sm font-bold text-amber-950">এক্সট্রা বগি (XTR Coach)</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">S_CHAIR +২০% | এসি +৩০%</span>
+                </div>
+                <p class="text-[11px] text-amber-800/90 mt-0.5 leading-tight">
+                  ঈদ বা পিক টাইমে অতিরিক্ত কোচে শোভন চেয়ারে ২০% এবং এসি ক্লাসে ৩০% বেশি নেওয়া হয়
+                </p>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+              <input type="checkbox" id="xtrToggle" onchange="handleXTRToggle()" class="sr-only peer">
+              <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+            </label>
+          </div>
+
+          <!-- ৫. যাত্রীর ধরন ও সংখ্যা -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-bold uppercase tracking-wide text-slate-700">যাত্রীর ধরন ও সংখ্যা</label>
+              <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">জনপ্রতি ২০৳ সার্ভিস চার্জ</span>
+            </div>
+
+            <div class="space-y-2.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/90">
+              <!-- Adult Counter -->
+              <div class="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-slate-900">প্রাপ্তবয়স্ক (Adult)</span>
+                    <span class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium">১০০% মূল ভাড়া</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5" id="unitTextAdult">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button type="button" onclick="updateCount('adult', -1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
+                  <span id="adultCount" class="w-7 text-center font-bold text-base font-num text-slate-900">1</span>
+                  <button type="button" onclick="updateCount('adult', 1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
+                </div>
+              </div>
+
+              <!-- Child Counter -->
+              <div class="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-slate-900">শিশু (Child: ৩–১২ বছর)</span>
+                    <span class="text-[11px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md font-semibold">৩৪% ছাড় (×0.66 ➔ 5)</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5" id="unitTextChild">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button type="button" onclick="updateCount('child', -1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
+                  <span id="childCount" class="w-7 text-center font-bold text-base font-num text-slate-900">0</span>
+                  <button type="button" onclick="updateCount('child', 1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
+                </div>
+              </div>
+
+              <!-- Senior Citizen Counter -->
+              <div class="bg-white p-3 rounded-xl border border-slate-200/80 flex flex-col gap-2 shadow-2xs">
+                <div class="flex items-center justify-between gap-2">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-sm text-slate-900">প্রবীণ নাগরিক (Senior: ৬৫+)</span>
+                      <span class="text-[11px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-semibold" id="seniorBadge">২৫% ছাড়</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5" id="unitTextSenior">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" onclick="updateCount('senior', -1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
+                    <span id="seniorCount" class="w-7 text-center font-bold text-base font-num text-slate-900">0</span>
+                    <button type="button" onclick="updateCount('senior', 1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
+                  </div>
+                </div>
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
+                  <span class="text-slate-600 font-medium">প্রবীণদের ছাড়ের নিয়ম:</span>
+                  <select id="seniorRuleSelect" onchange="calculateFare()" class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-600">
+                    <option value="GAZETTE_5">২৫% ছাড় (পরবর্তী ৫ টাকার গুণিতকে)</option>
+                    <option value="GAZETTE_1">২৫% ছাড় (পরবর্তী পূর্ণ টাকায়)</option>
+                    <option value="FULL">সাধারণ Adult ভাড়া (০% ছাড়)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- কাস্টম বেস ফেয়ার ড্রপডাউন -->
+          <!-- ৪. কাস্টম টিকিট ভাড়া ব্রেকডাউন ও রিভার্স ফেয়ার ক্যালকুলেটর -->
+          <div class="mt-4 pt-3 border-t border-slate-100">
+            <details class="group" id="customFareDetails" open>
+              <summary class="text-xs font-semibold text-slate-700 hover:text-emerald-700 cursor-pointer flex items-center justify-between list-none">
+                <span class="flex items-center gap-1.5 font-bold">
+                  <span>⚙️</span> কাস্টম টিকিট ভাড়া দিয়ে ভাঙুন ও টেস্ট করুন (২০৳ সার্ভিস চার্জ ছাড়া প্রদর্শিত ভাড়া)
+                </span>
+                <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <div class="mt-2.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div class="text-xs text-slate-700">
+                    <span class="font-bold text-slate-900">অ্যাপ / কাউন্টারের ১ জন প্রাপ্তবয়স্কের টিকিট ভাড়া (২০৳ সার্ভিস চার্জ বাদে):</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5">
+                      যেমন: 
+                      <button type="button" onclick="setCustomFareExample(1000)" class="font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer">১০০০</button>, 
+                      <button type="button" onclick="setCustomFareExample(1728)" class="font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer">১৭২৮</button>, 
+                      <button type="button" onclick="setCustomFareExample(1443)" class="font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer">১৪৪৩</button>, 
+                      <button type="button" onclick="setCustomFareExample(2644)" class="font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer">২৬৪৪</button>, 
+                      <button type="button" onclick="setCustomFareExample(754)" class="font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer">৭৫৪</button> 
+                      বসালে সিস্টেম স্বয়ংক্রিয়ভাবে মূল ভাড়া ও ভ্যাট ভেঙে দেবে এবং প্রতি আসনে ২০৳ সার্ভিস চার্জ যোগ করবে।
+                    </p>
+                  </div>
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="text-sm font-bold text-slate-500 font-num">৳</span>
+                    <input type="number" id="customBaseInput" min="0" step="1" placeholder="যেমন: 1000" oninput="calculateFare()" class="w-28 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm font-num font-bold text-emerald-950 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                    <button type="button" onclick="clearCustomBase()" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold cursor-pointer transition">মুছুন</button>
+                  </div>
+                </div>
+
+                <!-- লাইভ ফেয়ার ব্রেকডাউন প্যানেল (ইনপুট দিলে সাথে সাথে ভেসে উঠবে) -->
+                <div id="customBreakdownBox" class="hidden pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <!-- JS will dynamically render Adult, Child, Senior breakdown cards here -->
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+
+      <!-- ডান কলাম: অফিশিয়াল ই-টিকিট ভিউ ও গাণিতিক বিশ্লেষণ (7 Cols on LG) -->
+      <div class="lg:col-span-7 space-y-5">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-600"></span>
+              <h2 class="text-base sm:text-lg font-bold text-slate-800">অফিশিয়াল ই-টিকিট ভিউ (eticket.railway.gov.bd ফরম্যাট)</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="copySummaryToClipboard()" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 transition flex items-center gap-1 cursor-pointer">
+                <span>📋 হিসাব কপি করুন</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Official Ticket Box Replica (Exact GA-04.pdf Design & Typography) -->
+          <div class="eticket-box rounded-md shadow-xs border border-[#717171]">
+            
+            <!-- Official Header Replica matching GA-04.pdf -->
+            <div class="p-3 sm:p-4 bg-white border-b border-[#717171] flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <!-- Bangladesh Railway Crest Emblem -->
+                <div class="w-12 h-12 rounded-full border-2 border-emerald-800 bg-emerald-50/50 flex flex-col items-center justify-center text-center p-1 shadow-2xs shrink-0">
+                  <span class="text-xs font-bold text-emerald-900 leading-none">🚆</span>
+                  <span class="text-[7px] font-bold text-emerald-950 mt-0.5">রেলওয়ে</span>
+                </div>
+                <div>
+                  <div class="text-[#005a9c] font-bold text-sm sm:text-base tracking-wide leading-tight font-sans">BANGLADESH RAILWAY</div>
+                  <div class="text-[#008542] font-bold text-xs sm:text-sm -mt-0.5">বাংলাদেশ রেলওয়ে</div>
+                </div>
+              </div>
+
+              <!-- Shohoz JV & QR Code Badge -->
+              <div class="flex items-center gap-2 text-right shrink-0">
+                <div class="text-[9px] text-slate-500 leading-tight">
+                  <span class="block">Powered by</span>
+                  <span class="font-bold text-slate-900 text-[10px]">Shohoz</span><br>
+                  <span class="text-slate-700">Synesis</span><br>
+                  <span class="text-slate-700">Vincen <strong class="text-emerald-700">JV</strong></span>
+                </div>
+                <!-- Mini QR Code SVG Replica -->
+                <div class="w-10 h-10 border border-slate-400 p-0.5 bg-white flex items-center justify-center shrink-0">
+                  <svg class="w-full h-full text-slate-900" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm10-2h8v8h-8V2zm2 2v4h4V4h-4zM2 14h8v8H2v-8zm2 2v4h4v-4H4zm14 0h4v4h-4v-4zm-4 4h4v2h-4v-2zm4-4h2v2h-2v-2zm-4-4h2v4h-2v-4zm6 2h2v4h-2v-4z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Greeting Notification Text (From GA-04.pdf) -->
+            <div class="px-3.5 py-2.5 bg-white border-b border-[#717171] text-[11px] text-slate-700 leading-relaxed">
+              <div class="font-bold text-slate-900">Dear PASSENGER,</div>
+              <div class="text-[10.5px]">Your request to book e-ticket for your journey in Bangladesh Railway was successful. You can travel on the train mentioned in the ticket subject to showing your NID or Photo ID card. The details of your e-ticket are as below:</div>
+              <div class="mt-1 text-[10.5px] text-slate-800 font-medium">বাংলাদেশ রেলওয়েতে ভ্রমণের জন্য আপনার চাহিদাকৃত ই-টিকিট সফলভাবে প্রদান করা হয়েছে। আপনার এনআইডি কিংবা ছবি সম্বলিত আইডি দেখানো সাপেক্ষে আপনি টিকিটে বর্ণিত ট্রেনে যাত্রা করতে পারবেন। ই-টিকিটের বিস্তারিত নিম্নে দেয়া হল:-</div>
+            </div>
+
+            <!-- Table Header Bar -->
+            <div class="eticket-header">
+              Journey Information (যাত্রার তথ্য)
+            </div>
+
+            <!-- Official Ticket Table -->
+            <table class="eticket-table">
+              <tbody>
+                <tr>
+                  <td>Issue Date &amp; Time (প্রদানের তারিখ ও সময়)</td>
+                  <td id="etIssueDate" class="font-ticket-num font-medium">11-07-2026 09:46 (১১-০৭-২০২৬ ০৯:৪৬)</td>
+                </tr>
+                <tr>
+                  <td>Journey Date &amp; Time (যাত্রার তারিখ ও সময়)</td>
+                  <td id="etJourneyDate" class="font-ticket-num font-medium">21-07-2026 23:00 (২১-০৭-২০২৬ ২৩:০০)</td>
+                </tr>
+                <tr>
+                  <td>Train Name &amp; Number (ট্রেন নম্বর ও নাম)</td>
+                  <td id="etTrainName" class="font-medium">COXS BAZAR EXPRESS [814] (কক্সবাজার এক্সপ্রেস)</td>
+                </tr>
+                <tr>
+                  <td>From Station (প্রারম্ভিক স্টেশন)</td>
+                  <td id="etFromStation">Dhaka (ঢাকা)</td>
+                </tr>
+                <tr>
+                  <td>To Station (গন্তব্য স্টেশন)</td>
+                  <td id="etToStation">Cox's Bazar (কক্সবাজার)</td>
+                </tr>
+                <tr>
+                  <td>Class Name (শ্রেণির নাম)</td>
+                  <td id="etClassName">AC_S (এসি সিট)</td>
+                </tr>
+                <tr>
+                  <td>Coach Name / Seat(s) (কোচের নাম / আসন)</td>
+                  <td id="etCoachName" class="font-medium text-emerald-900">GA-4 (গ-৪)</td>
+                </tr>
+                <tr>
+                  <td>No. of Seats (আসন সংখ্যা)</td>
+                  <td id="etTotalSeats" class="font-ticket-num">1 (১)</td>
+                </tr>
+                <tr>
+                  <td>No. of Adult Passenger(s) (প্রাপ্তবয়স্ক যাত্রীর সংখ্যা)</td>
+                  <td id="etAdultCount" class="font-ticket-num">1 (১)</td>
+                </tr>
+                <tr>
+                  <td>No. of Senior Citizen Passenger(s) (প্রবীণ যাত্রীর সংখ্যা)</td>
+                  <td id="etSeniorCount" class="font-ticket-num">0 (০)</td>
+                </tr>
+                <tr>
+                  <td>No. of Child Passenger(s) (শিশু যাত্রীর সংখ্যা)</td>
+                  <td id="etChildCount" class="font-ticket-num">0 (০)</td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">Fare (ভাড়া)**</td>
+                  <td id="etFare" class="font-ticket-num font-semibold text-slate-900">BDT 1,502.00 (১,৫০২.০০ টাকা)</td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">VAT (ভ্যাট)</td>
+                  <td id="etVat" class="font-ticket-num font-semibold text-slate-900">BDT 226.00 (২২৬.০০ টাকা)</td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">Service Charge (সেবা খরচ)</td>
+                  <td id="etService" class="font-ticket-num font-semibold text-slate-900">BDT 20.00 (২০.০০ টাকা)</td>
+                </tr>
+                <tr class="bg-emerald-50/30">
+                  <td class="font-bold text-slate-950">Total Fare (মোট ভাড়া)**</td>
+                  <td id="etTotalFare" class="font-ticket-num font-bold text-emerald-950 text-base">BDT 1,748.00 (১,৭৪৮.০০ টাকা)</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Footnote from GA-04.pdf -->
+            <div class="px-3 py-2 bg-white border-t border-[#717171] text-[11px] text-slate-700 leading-snug">
+              ** Total Fare includes BDT 50 Bedding Charges per seat for AC_B and F_BERTH seat classes. (এসি_বি এবং এফ_বার্থ সিট ক্লাসের প্রতি সিটে মোট ভাড়ার সাথে ৳৫০ বেডিং চার্জ অন্তর্ভুক্ত)
+            </div>
+          </div>
+
+          <!-- Warning if seats > 4 -->
+          <div id="seatLimitAlert" class="hidden mt-3.5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-2">
+            <span class="text-base">⚠️</span>
+            <span><strong>অনলাইন বুকিং নোট:</strong> বাংলাদেশ রেলওয়ের ওয়েবসাইটে একটি অ্যাকাউন্ট থেকে এক বুকিংয়ে সর্বোচ্চ <strong>৪টি আসনের</strong> টিকিট একসাথে কাটা যায়।</span>
+          </div>
+        </div>
+
+        <!-- ফর্মুলা ও ব্রেকডাউন সেকশন -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-6">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-base font-bold text-slate-800">যাত্রীভিত্তিক সূক্ষ্ম বিশ্লেষণ ও গাণিতিক সূত্র (Formula Inspector)</h3>
+              <p class="text-xs text-slate-500">রেলওয়ের অ্যালগরিদম অনুযায়ী প্রতিটি ধাপের নির্ভুল গাণিতিক হিসাব</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200" id="routeBadgeText">
+              ঢাকা ➔ কক্সবাজার
+            </span>
+          </div>
+
+          <!-- Granular Breakdown Table -->
+          <div class="overflow-x-auto rounded-xl border border-slate-200 mb-4">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                  <th class="py-2.5 px-3 font-bold">যাত্রীর ধরন ও সংখ্যা</th>
+                  <th class="py-2.5 px-3 font-bold text-right">মূল ভাড়া</th>
+                  <th class="py-2.5 px-3 font-bold text-right">বেডিং চার্জ</th>
+                  <th class="py-2.5 px-3 font-bold text-right">১৫% ভ্যাট</th>
+                  <th class="py-2.5 px-3 font-bold text-right">সার্ভিস চার্জ</th>
+                  <th class="py-2.5 px-3 font-bold text-right">মোট টাকা</th>
+                </tr>
+              </thead>
+              <tbody id="granularTableBody" class="divide-y divide-slate-200 font-num"></tbody>
+              <tfoot id="granularTableFoot" class="bg-emerald-50/70 font-bold text-slate-900 border-t-2 border-emerald-600 font-num"></tfoot>
+            </table>
+          </div>
+
+          <!-- Step-by-Step Mathematical Formula Box -->
+          <div class="rounded-xl bg-slate-900 text-slate-100 p-4 text-xs sm:text-sm space-y-2 font-num">
+            <div class="flex items-center justify-between text-emerald-400 font-bold text-xs uppercase tracking-wider border-b border-slate-700 pb-2">
+              <span>🔍 ব্যাকএন্ড ক্যালকুলেশন লগ (Step-by-Step Proof)</span>
+              <span>eticket.railway.gov.bd Algorithm</span>
+            </div>
+            <div id="formulaInspectorContent" class="space-y-1.5 text-slate-200 leading-relaxed"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- নির্বাচিত রুটের সম্পূর্ণ অফিশিয়াল ভাড়ার চার্ট -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+            <span>📋</span> <span id="fullChartTitle">ঢাকা ↔ কক্সবাজার রুটের সকল স্টেশনের অফিশিয়াল ভাড়ার চার্ট</span>
+          </h2>
+          <p class="text-xs text-slate-500">যেকোনো স্টেশনের পাশে <strong>"হিসাব করুন"</strong> বাটনে ক্লিক করলে তা সরাসরি ক্যালকুলেটরে সেট হয়ে যাবে</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="stationSearchInput" oninput="renderFullChart()" placeholder="স্টেশন খুঁজুন (যেমন: চট্টগ্রাম, কুমিল্লা, দিনাজপুর)..." class="w-full sm:w-64 rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm outline-none focus:border-emerald-600">
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="bg-[#006747] text-white">
+              <th class="py-3 px-3 text-center font-semibold">ক্র.</th>
+              <th class="py-3 px-3 text-left font-semibold">স্টেশনের নাম</th>
+              <th class="py-3 px-3 text-center font-semibold">যে ট্রেন থামে</th>
+              <th class="py-3 px-3 text-right font-semibold">S_CHAIR<br><span class="text-[11px] font-normal text-emerald-100">(ভ্যাটমুক্ত)</span></th>
+              <th class="py-3 px-3 text-right font-semibold">SNIGDHA<br><span class="text-[11px] font-normal text-emerald-100">(ভ্যাটসহ)</span></th>
+              <th class="py-3 px-3 text-right font-semibold">AC_S<br><span class="text-[11px] font-normal text-emerald-100">(ভ্যাটসহ)</span></th>
+              <th class="py-3 px-3 text-right font-semibold">AC_B<br><span class="text-[11px] font-normal text-emerald-100">(ভ্যাট + ৫০ বেডিং)</span></th>
+              <th class="py-3 px-3 text-center font-semibold">অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="fullChartBody" class="divide-y divide-slate-200"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- অটো-টেস্ট মোডাল -->
+  <div id="testModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+        <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+          <span>✅ স্বয়ংক্রিয় ভাড়া ও ভ্যাট যাচাইকরণ রিপোর্ট (Automated QA Suite)</span>
+        </h3>
+        <button onclick="toggleTestModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold cursor-pointer">✕</button>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-600 mb-4">
+        বাংলাদেশ রেলওয়ের অফিসিয়াল ই-টিকিট এবং আপনার দেওয়া স্ক্রিনশট ও মূল টিকিট মিলিয়ে মোট <strong>৯টি বেঞ্চমার্ক টেস্ট কেস (এক্সট্রা বগিসহ)</strong> স্বয়ংক্রিয়ভাবে পরীক্ষা করা হয়েছে:
+      </p>
+      <div id="testResultsList" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
+      <div class="mt-5 pt-3 border-t border-slate-200 flex justify-end">
+        <button onclick="toggleTestModal()" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-semibold cursor-pointer">বন্ধ করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toastBox" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium transition-all duration-300 opacity-0 pointer-events-none translate-y-2 z-50">
+    হিসাব কপি করা হয়েছে!
+  </div>
+
+  <script>
+    /**
+     * করিডোর ও ট্রেনের অফিশিয়াল ডেটাবেজ
+     * ১০০% নির্ভুল ভ্যাট, বেস ফেয়ার এবং ডিস্ট্যান্স ম্যাট্রিক্স
+     */
+    const CORRIDORS = {
+      COXS_BAZAR: {
+        id: "COXS_BAZAR",
+        name: "ঢাকা ↔ কক্সবাজার (উপকূলীয় ও পর্যটন করিডোর)",
+        shortName: "কক্সবাজার",
+        defaultFrom: "DAKA",
+        defaultTo: "COXB",
+        defaultTrain: "816",
+        defaultClass: "SNIGDHA",
+        quickChips: [
+          { id: "DAKA", label: "ঢাকা" },
+          { id: "BMB", label: "বিমানবন্দর" },
+          { id: "CUM", label: "কুমিল্লা" },
+          { id: "CTG", label: "চট্টগ্রাম" },
+          { id: "COXB", label: "কক্সবাজার" }
+        ],
+        trains: [
+          {
+            id: "816",
+            noUp: "816",
+            noDown: "815",
+            name: "PARJOTAK EXPRESS",
+            bn: "পর্যটক এক্সপ্রেস",
+            timeUp: "০৬:১৫ AM (ঢাকা)",
+            timeDown: "০৮:০০ PM (কক্সবাজার)",
+            duration: "৮ ঘণ্টা ২৫ মি.",
+            stops: 4,
+            classes: ["S_CHAIR", "SNIGDHA", "AC_S", "AC_B"],
+            badgeClass: "bg-teal-100 text-teal-800 border-teal-300"
+          },
+          {
+            id: "814",
+            noUp: "814",
+            noDown: "813",
+            name: "COXS BAZAR EXPRESS",
+            bn: "কক্সবাজার এক্সপ্রেস",
+            timeUp: "১১:০০ PM (ঢাকা)",
+            timeDown: "১২:৩০ PM (কক্সবাজার)",
+            duration: "৮ ঘণ্টা ২০ মি.",
+            stops: 4,
+            classes: ["S_CHAIR", "SNIGDHA", "AC_S", "AC_B"],
+            badgeClass: "bg-indigo-100 text-indigo-800 border-indigo-300"
+          },
+          {
+            id: "722",
+            noUp: "722",
+            noDown: "721",
+            name: "MOHANAGAR EXPRESS",
+            bn: "মহানগর এক্সপ্রেস",
+            timeUp: "০৮:৩০ PM (ঢাকা)",
+            timeDown: "১২:৩০ PM (কক্সবাজার)",
+            duration: "৯ ঘণ্টা ৩০ মি.",
+            stops: 14,
+            classes: ["S_CHAIR", "SNIGDHA", "AC_S", "AC_B"],
+            badgeClass: "bg-amber-100 text-amber-900 border-amber-300"
+          }
+        ],
+        stations: [
+          {
+            id: "DAKA", en: "Dhaka", bn: "ঢাকা", km: 0, trains: ["816", "814", "722"],
+            fromDhakaBase: { S_CHAIR: 0, SNIGDHA: 0, AC_S: 0, AC_B: 0 },
+            fromTerminalBase: { S_CHAIR: 754, SNIGDHA: 1254, AC_S: 1502, AC_B: 2255, m722: { S_CHAIR: 685, SNIGDHA: 1140, AC_S: 1365, AC_B: 2050 } }
+          },
+          {
+            id: "BMB", en: "Biman_Bandar", bn: "বিমানবন্দর", km: 23, trains: ["816", "814", "722"],
+            fromDhakaBase: { S_CHAIR: 50, SNIGDHA: 100, AC_S: 110, AC_B: 130 },
+            fromTerminalBase: { S_CHAIR: 725, SNIGDHA: 1210, AC_S: 1450, AC_B: 2170, m722: { S_CHAIR: 660, SNIGDHA: 1100, AC_S: 1315, AC_B: 1980 } }
+          },
+          {
+            id: "NRD", en: "Narsingdi", bn: "নরসিংদী", km: 55, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 95, SNIGDHA: 185, AC_S: 220, AC_B: 290 },
+            fromTerminalBase: { S_CHAIR: 630, SNIGDHA: 1050, AC_S: 1260, AC_B: 1890 }
+          },
+          {
+            id: "BHRB", en: "Bhairab_Bazar", bn: "ভৈরব বাজার", km: 87, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 135, SNIGDHA: 255, AC_S: 305, AC_B: 410 },
+            fromTerminalBase: { S_CHAIR: 590, SNIGDHA: 985, AC_S: 1180, AC_B: 1770 }
+          },
+          {
+            id: "ASH", en: "Ashuganj", bn: "আশুগঞ্জ", km: 92, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 140, SNIGDHA: 265, AC_S: 315, AC_B: 425 },
+            fromTerminalBase: { S_CHAIR: 585, SNIGDHA: 975, AC_S: 1170, AC_B: 1755 }
+          },
+          {
+            id: "BB", en: "Brahmanbaria", bn: "ব্রাহ্মণবাড়িয়া", km: 112, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 145, SNIGDHA: 330, AC_S: 395, AC_B: 535 },
+            fromTerminalBase: { S_CHAIR: 560, SNIGDHA: 935, AC_S: 1120, AC_B: 1680 }
+          },
+          {
+            id: "AKH", en: "Akhaura", bn: "আখাউড়া", km: 135, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 185, SNIGDHA: 350, AC_S: 420, AC_B: 565 },
+            fromTerminalBase: { S_CHAIR: 530, SNIGDHA: 885, AC_S: 1060, AC_B: 1590 }
+          },
+          {
+            id: "KSB", en: "Kasba", bn: "কসবা", km: 160, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 195, SNIGDHA: 370, AC_S: 445, AC_B: 600 },
+            fromTerminalBase: { S_CHAIR: 500, SNIGDHA: 835, AC_S: 1000, AC_B: 1500 }
+          },
+          {
+            id: "CUM", en: "Cumilla", bn: "কুমিল্লা", km: 195, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 205, SNIGDHA: 391, AC_S: 466, AC_B: 702 },
+            fromTerminalBase: { S_CHAIR: 450, SNIGDHA: 750, AC_S: 900, AC_B: 1350 }
+          },
+          {
+            id: "LAK", en: "Laksam", bn: "লাকসাম", km: 220, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 225, SNIGDHA: 430, AC_S: 515, AC_B: 770 },
+            fromTerminalBase: { S_CHAIR: 420, SNIGDHA: 700, AC_S: 840, AC_B: 1260 }
+          },
+          {
+            id: "NGK", en: "Nangalkot", bn: "নাঙ্গলকোট", km: 242, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 240, SNIGDHA: 460, AC_S: 550, AC_B: 825 },
+            fromTerminalBase: { S_CHAIR: 395, SNIGDHA: 660, AC_S: 790, AC_B: 1185 }
+          },
+          {
+            id: "FEN", en: "Feni", bn: "ফেনী", km: 266, trains: ["722"],
+            fromDhakaBase: { S_CHAIR: 265, SNIGDHA: 506, AC_S: 604, AC_B: 909 },
+            fromTerminalBase: { S_CHAIR: 365, SNIGDHA: 610, AC_S: 730, AC_B: 1095 }
+          },
+          {
+            id: "CTG", en: "Chattogram", bn: "চট্টগ্রাম", km: 345, trains: ["816", "814", "722"],
+            fromDhakaBase: { S_CHAIR: 450, SNIGDHA: 745, AC_S: 895, AC_B: 1340, m722: { S_CHAIR: 345, SNIGDHA: 570, AC_S: 690, AC_B: 1025 } },
+            fromTerminalBase: { S_CHAIR: 250, SNIGDHA: 410, AC_S: 490, AC_B: 690 }
+          },
+          {
+            id: "COXB", en: "Cox's Bazar", bn: "কক্সবাজার", km: 495, trains: ["816", "814", "722"],
+            fromDhakaBase: { S_CHAIR: 754, SNIGDHA: 1254, AC_S: 1502, AC_B: 2255, m722: { S_CHAIR: 685, SNIGDHA: 1140, AC_S: 1365, AC_B: 2050 } },
+            fromTerminalBase: { S_CHAIR: 0, SNIGDHA: 0, AC_S: 0, AC_B: 0 }
+          }
+        ]
+      },
+
+      PANCHAGARH: {
+        id: "PANCHAGARH",
+        name: "ঢাকা ↔ পঞ্চগড় (উত্তরবঙ্গ করিডোর)",
+        shortName: "পঞ্চগড়",
+        defaultFrom: "TKR",
+        defaultTo: "DAKA",
+        defaultTrain: "757",
+        defaultClass: "AC_S",
+        quickChips: [
+          { id: "DAKA", label: "ঢাকা" },
+          { id: "BMB", label: "বিমানবন্দর" },
+          { id: "DGP", label: "দিনাজপুর" },
+          { id: "TKR", label: "ঠাকুরগাঁও" },
+          { id: "BSI", label: "পঞ্চগড়" }
+        ],
+        trains: [
+          {
+            id: "757",
+            noUp: "757",
+            noDown: "758",
+            name: "DRUTOJAN EXPRESS",
+            bn: "দ্রুতযান এক্সপ্রেস",
+            timeUp: "০৭:৪৫ PM (ঢাকা)",
+            timeDown: "০৭:২০ AM (পঞ্চগড়)",
+            duration: "১০ ঘণ্টা ৩৫ মি.",
+            stops: 25,
+            classes: ["S_CHAIR", "SNIGDHA", "AC_S", "AC_B"],
+            badgeClass: "bg-amber-100 text-amber-900 border-amber-300"
+          },
+          {
+            id: "705",
+            noUp: "705",
+            noDown: "706",
+            name: "EKOTA EXPRESS",
+            bn: "একতা এক্সপ্রেস",
+            timeUp: "১০:১৫ AM (ঢাকা)",
+            timeDown: "০৯:০০ PM (পঞ্চগড়)",
+            duration: "১০ ঘণ্টা ৫০ মি.",
+            stops: 24,
+            classes: ["S_CHAIR", "SNIGDHA", "AC_S", "AC_B"],
+            badgeClass: "bg-blue-100 text-blue-900 border-blue-300"
+          },
+          {
+            id: "793",
+            noUp: "793",
+            noDown: "794",
+            name: "PANCHAGARH EXPRESS",
+            bn: "পঞ্চগড় এক্সপ্রেস",
+            timeUp: "১১:৩০ PM (ঢাকা)",
+            timeDown: "০১:১৫ PM (পঞ্চগড়)",
+            duration: "৯ ঘণ্টা ৪৫ মি.",
+            stops: 10,
+            classes: ["S_CHAIR", "SNIGDHA", "AC_S", "AC_B"],
+            badgeClass: "bg-pink-100 text-pink-900 border-pink-300"
+          }
+        ],
+        stations: [
+          { id: "DAKA", en: "Dhaka", bn: "ঢাকা", km: 0, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 0, SNIGDHA: 0, AC_S: 0, AC_B: 0 },
+            fromTerminalBase: { S_CHAIR: 740, SNIGDHA: 1235, AC_S: 1480, AC_B: 2215 } },
+          { id: "BMB", en: "Biman_Bandar", bn: "বিমানবন্দর", km: 23, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 50, SNIGDHA: 100, AC_S: 110, AC_B: 130 },
+            fromTerminalBase: { S_CHAIR: 715, SNIGDHA: 1190, AC_S: 1430, AC_B: 2145 } },
+          { id: "JYDB", en: "Joydebpur", bn: "জয়দেবপুর", km: 34, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 50, SNIGDHA: 100, AC_S: 110, AC_B: 130 },
+            fromTerminalBase: { S_CHAIR: 700, SNIGDHA: 1165, AC_S: 1400, AC_B: 2100 } },
+          { id: "TGL", en: "Tangail", bn: "টাঙ্গাইল", km: 98, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 115, SNIGDHA: 190, AC_S: 230, AC_B: 345 },
+            fromTerminalBase: { S_CHAIR: 625, SNIGDHA: 1045, AC_S: 1250, AC_B: 1875 } },
+          { id: "IBH", en: "Ibrahimabad", bn: "ইব্রাহিমাবাদ", km: 120, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 140, SNIGDHA: 235, AC_S: 280, AC_B: 420 },
+            fromTerminalBase: { S_CHAIR: 605, SNIGDHA: 1005, AC_S: 1205, AC_B: 1805 } },
+          { id: "SHMA", en: "SH_M_Monsur_Ali", bn: "শহীদ এম. মনসুর আলী", km: 252, trains: ["705"],
+            fromDhakaBase: { S_CHAIR: 295, SNIGDHA: 495, AC_S: 590, AC_B: 885 },
+            fromTerminalBase: { S_CHAIR: 445, SNIGDHA: 740, AC_S: 890, AC_B: 1335 } },
+          { id: "JMTL", en: "Jamtail", bn: "জামতৈল", km: 260, trains: ["757"],
+            fromDhakaBase: { S_CHAIR: 305, SNIGDHA: 505, AC_S: 610, AC_B: 915 },
+            fromTerminalBase: { S_CHAIR: 435, SNIGDHA: 725, AC_S: 870, AC_B: 1305 } },
+          { id: "ULP", en: "Ullapara", bn: "উল্লাপাড়া", km: 273, trains: ["705"],
+            fromDhakaBase: { S_CHAIR: 320, SNIGDHA: 535, AC_S: 640, AC_B: 960 },
+            fromTerminalBase: { S_CHAIR: 425, SNIGDHA: 705, AC_S: 845, AC_B: 1265 } },
+          { id: "CMO", en: "Chatmohar", bn: "চাটমোহর", km: 306, trains: ["757"],
+            fromDhakaBase: { S_CHAIR: 360, SNIGDHA: 595, AC_S: 715, AC_B: 1075 },
+            fromTerminalBase: { S_CHAIR: 380, SNIGDHA: 635, AC_S: 765, AC_B: 1145 } },
+          { id: "ISDB", en: "Ishwardi_Bypass", bn: "ঈশ্বরদী বাইপাস", km: 328, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 385, SNIGDHA: 640, AC_S: 770, AC_B: 1150 },
+            fromTerminalBase: { S_CHAIR: 355, SNIGDHA: 595, AC_S: 710, AC_B: 1065 } },
+          { id: "NAT", en: "Natore", bn: "নাটোর", km: 359, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 420, SNIGDHA: 700, AC_S: 840, AC_B: 1260 },
+            fromTerminalBase: { S_CHAIR: 325, SNIGDHA: 535, AC_S: 645, AC_B: 965 } },
+          { id: "AHG", en: "Ahsanganj", bn: "আহসানগঞ্জ", km: 383, trains: ["757"],
+            fromDhakaBase: { S_CHAIR: 450, SNIGDHA: 745, AC_S: 895, AC_B: 1345 },
+            fromTerminalBase: { S_CHAIR: 290, SNIGDHA: 485, AC_S: 585, AC_B: 875 } },
+          { id: "STU", en: "Santahar", bn: "সান্তাহার", km: 404, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 475, SNIGDHA: 790, AC_S: 945, AC_B: 1415 },
+            fromTerminalBase: { S_CHAIR: 270, SNIGDHA: 450, AC_S: 540, AC_B: 805 } },
+          { id: "AKP", en: "Akkelpur", bn: "আক্কেলপুর", km: 421, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 495, SNIGDHA: 820, AC_S: 985, AC_B: 1475 },
+            fromTerminalBase: { S_CHAIR: 250, SNIGDHA: 415, AC_S: 500, AC_B: 745 } },
+          { id: "JYP", en: "Joypurhat", bn: "জয়পুরহাট", km: 436, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 510, SNIGDHA: 850, AC_S: 1020, AC_B: 1530 },
+            fromTerminalBase: { S_CHAIR: 230, SNIGDHA: 385, AC_S: 460, AC_B: 685 } },
+          { id: "PBB", en: "Panchbibi", bn: "পাঁচবিবি", km: 449, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 525, SNIGDHA: 875, AC_S: 1050, AC_B: 1575 },
+            fromTerminalBase: { S_CHAIR: 220, SNIGDHA: 365, AC_S: 440, AC_B: 655 } },
+          { id: "BMP", en: "Birampur", bn: "বিরামপুর", km: 470, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 550, SNIGDHA: 915, AC_S: 1100, AC_B: 1650 },
+            fromTerminalBase: { S_CHAIR: 195, SNIGDHA: 320, AC_S: 385, AC_B: 575 } },
+          { id: "FBR", en: "Fulbari", bn: "ফুলবাড়ী", km: 481, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 565, SNIGDHA: 940, AC_S: 1125, AC_B: 1690 },
+            fromTerminalBase: { S_CHAIR: 180, SNIGDHA: 300, AC_S: 360, AC_B: 535 } },
+          { id: "PBT", en: "Parbatipur", bn: "পার্বতীপুর", km: 499, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 585, SNIGDHA: 975, AC_S: 1170, AC_B: 1750 },
+            fromTerminalBase: { S_CHAIR: 155, SNIGDHA: 260, AC_S: 310, AC_B: 465 } },
+          { id: "CRB", en: "Chirirbandar", bn: "চিরিরবন্দর", km: 515, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 605, SNIGDHA: 1005, AC_S: 1205, AC_B: 1810 },
+            fromTerminalBase: { S_CHAIR: 140, SNIGDHA: 235, AC_S: 280, AC_B: 415 } },
+          { id: "DGP", en: "Dinajpur", bn: "দিনাজপুর", km: 537, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 630, SNIGDHA: 1050, AC_S: 1255, AC_B: 1885 },
+            fromTerminalBase: { S_CHAIR: 125, SNIGDHA: 205, AC_S: 245, AC_B: 365 } },
+          { id: "STG", en: "Setabganj", bn: "সেতাবগঞ্জ", km: 560, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 655, SNIGDHA: 1095, AC_S: 1310, AC_B: 1965 },
+            fromTerminalBase: { S_CHAIR: 90, SNIGDHA: 145, AC_S: 175, AC_B: 260 } },
+          { id: "PRG", en: "Pirganj", bn: "পীরগঞ্জ", km: 573, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 670, SNIGDHA: 1120, AC_S: 1340, AC_B: 2010 },
+            fromTerminalBase: { S_CHAIR: 75, SNIGDHA: 125, AC_S: 150, AC_B: 220 } },
+          { id: "TKR", en: "Thakurgaon_Road", bn: "ঠাকুরগাঁও রোড", km: 594, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 695, SNIGDHA: 1160, AC_S: 1390, AC_B: 2085 },
+            fromTerminalBase: { S_CHAIR: 50, SNIGDHA: 100, AC_S: 110, AC_B: 140 } },
+          { id: "RHA", en: "Ruhia", bn: "রুহিয়া", km: 610, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 715, SNIGDHA: 1190, AC_S: 1430, AC_B: 2145 },
+            fromTerminalBase: { S_CHAIR: 50, SNIGDHA: 100, AC_S: 110, AC_B: 130 } },
+          { id: "KMT", en: "Kismat", bn: "কিসমত", km: 621, trains: ["705", "757"],
+            fromDhakaBase: { S_CHAIR: 740, SNIGDHA: 1235, AC_S: 1480, AC_B: 2215 },
+            fromTerminalBase: { S_CHAIR: 50, SNIGDHA: 100, AC_S: 110, AC_B: 130 } },
+          { id: "BSI", en: "B_Sirajul_Islam", bn: "পঞ্চগড়", km: 632, trains: ["705", "757", "793"],
+            fromDhakaBase: { S_CHAIR: 740, SNIGDHA: 1235, AC_S: 1480, AC_B: 2215 },
+            fromTerminalBase: { S_CHAIR: 0, SNIGDHA: 0, AC_S: 0, AC_B: 0 } }
+        ]
+      }
+    };
+
+    const CLASS_META = {
+      S_CHAIR: { code: "S_CHAIR", bnName: "শোভন চেয়ার", etLabel: "S_CHAIR (শোভন চেয়ার)", vatRate: 0, bedding: 0, ratePerKm: 1.17, minBase: 50 },
+      SNIGDHA: { code: "SNIGDHA", bnName: "স্নিগ্ধা", etLabel: "SNIGDHA (স্নিগ্ধা)", vatRate: 0.15, bedding: 0, ratePerKm: 1.95, minBase: 100 },
+      AC_S:    { code: "AC_S", bnName: "এসি সিট", etLabel: "AC_S (এসি সিট)", vatRate: 0.15, bedding: 0, ratePerKm: 2.34, minBase: 110 },
+      AC_B:    { code: "AC_B", bnName: "এসি বার্থ", etLabel: "AC_B (এসি বার্থ)", vatRate: 0.15, bedding: 50, ratePerKm: 3.51, minBase: 130 }
+    };
+
+    // স্টেট ভেরিয়েবলসমূহ
+    let activeCorridorId = "COXS_BAZAR"; // ডিফল্টভাবে নতুন কক্সবাজার রুট ওপেন হবে
+    let selectedClass = "SNIGDHA";
+    let counts = { adult: 1, child: 0, senior: 0 };
+    let isXTRCoach = false; // এক্সট্রা বগি (XTR Coach: S_CHAIR +20%, AC +30%)
+
+    function handleXTRToggle() {
+      const toggle = document.getElementById("xtrToggle");
+      isXTRCoach = toggle ? toggle.checked : false;
+      calculateFare();
+    }
+
+    function toBnDigits(strOrNum) {
+      const bnMap = { '0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯' };
+      return String(strOrNum).replace(/[0-9]/g, d => bnMap[d]);
+    }
+
+    function formatEnCurrency(amount) {
+      return amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatBnCurrency(amount) {
+      return toBnDigits(formatEnCurrency(amount));
+    }
+
+    function formatBnInt(amount) {
+      return amount.toLocaleString('bn-BD');
+    }
+
+    function ceilTo5(val) {
+      return Math.ceil((val - 1e-9) / 5) * 5;
+    }
+
+    function roundNearest5(val) {
+      return Math.round(val / 5) * 5;
+    }
+
+    function getActiveCorridor() {
+      return CORRIDORS[activeCorridorId];
+    }
+
+    function selectCorridor(corridorId, forceDefaultStations = true) {
+      activeCorridorId = corridorId;
+
+      // ট্যাব স্টাইলিং আপডেট
+      document.querySelectorAll(".corridor-tab").forEach(tab => {
+        tab.classList.remove("active", "border-emerald-600", "bg-white", "text-emerald-800", "shadow-sm");
+        tab.classList.add("border-transparent", "text-slate-600", "bg-transparent");
+      });
+      const activeTab = document.getElementById("tab-" + corridorId);
+      if (activeTab) {
+        activeTab.classList.add("active", "border-emerald-600", "bg-white", "text-emerald-800", "shadow-sm");
+        activeTab.classList.remove("border-transparent", "text-slate-600", "bg-transparent");
+      }
+
+      const corridor = getActiveCorridor();
+
+      // ১. রেন্ডার ট্রেন কার্ড ও ড্রপডাউন
+      renderTrainCardsAndSelect();
+
+      // ২. কুইক স্টেশন চিপস রেন্ডার
+      renderQuickStationChips();
+
+      // ৩. স্টেশন পপুলেট
+      if (forceDefaultStations) {
+        populateStations(corridor.defaultFrom, corridor.defaultTo);
+        selectedClass = corridor.defaultClass;
+      } else {
+        populateStations();
+      }
+
+      // ৪. চার্ট টাইটেল আপডেট ও রেন্ডার
+      document.getElementById("fullChartTitle").textContent = `${corridor.name}ের সকল স্টেশনের অফিশিয়াল ভাড়ার চার্ট`;
+      renderFullChart();
+
+      calculateFare();
+    }
+
+    function renderTrainCardsAndSelect() {
+      const corridor = getActiveCorridor();
+      const select = document.getElementById("trainSelect");
+      select.innerHTML = "";
+
+      // ড্রপডাউনে "ALL" অপশন
+      const allOption = new Option(`সকল ট্রেন (${corridor.shortName} রুটের সব স্টেশন)`, "ALL");
+      select.add(allOption);
+
+      corridor.trains.forEach((train) => {
+        const opt = new Option(`${train.bn} [${train.id}] (${train.timeUp.split(' ')[0]} • ${train.stops}টি স্টপেজ)`, train.id);
+        select.add(opt);
+      });
+
+      // ডিফল্ট সিলেক্টেড ট্রেন সেট
+      select.value = corridor.defaultTrain;
+      updateActiveTrainUI(corridor.defaultTrain);
+    }
+
+    function updateActiveTrainUI(trainId) {
+      const corridor = getActiveCorridor();
+      const currentTrain = corridor.trains.find(t => t.id === trainId);
+      const badge = document.getElementById("activeTrainInfoBadge");
+      if (!badge) return;
+
+      if (currentTrain) {
+        badge.textContent = `${currentTrain.bn} (${currentTrain.stops}টি বিরতি)`;
+        badge.className = "text-[11px] font-semibold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-md";
+      } else {
+        badge.textContent = "সকল অনুমোদিত ট্রেন";
+        badge.className = "text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md";
+      }
+    }
+
+    function handleTrainSelectChange() {
+      const trainId = document.getElementById("trainSelect").value;
+      updateActiveTrainUI(trainId);
+      populateStations();
+      calculateFare();
+    }
+
+    function renderQuickStationChips() {
+      const corridor = getActiveCorridor();
+      const container = document.getElementById("quickStationChips");
+      container.innerHTML = "";
+
+      corridor.quickChips.forEach(chip => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.onclick = () => setDestinationStation(chip.id);
+        btn.className = "text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-700 transition cursor-pointer border border-slate-200";
+        btn.innerHTML = `➔ ${chip.label}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function setDestinationStation(stationId) {
+      const toSel = document.getElementById("toStation");
+      const fromSel = document.getElementById("fromStation");
+      if (fromSel.value === stationId) {
+        fromSel.value = activeCorridorId === "COXS_BAZAR" ? "DAKA" : "DAKA";
+      }
+      toSel.value = stationId;
+      calculateFare();
+    }
+
+    function populateStations(defaultFromId, defaultToId) {
+      const corridor = getActiveCorridor();
+      const trainFilter = document.getElementById("trainSelect").value;
+      const fromSel = document.getElementById("fromStation");
+      const toSel = document.getElementById("toStation");
+
+      const currentFrom = defaultFromId || fromSel.value || corridor.defaultFrom;
+      const currentTo = defaultToId || toSel.value || corridor.defaultTo;
+
+      const filtered = corridor.stations.filter(s => trainFilter === "ALL" || s.trains.includes(trainFilter));
+
+      fromSel.innerHTML = "";
+      toSel.innerHTML = "";
+
+      filtered.forEach(st => {
+        const label = `${st.bn.replace(/_/g, ' ')} (${st.en.replace(/_/g, ' ')})`;
+        fromSel.add(new Option(label, st.id));
+        toSel.add(new Option(label, st.id));
+      });
+
+      fromSel.value = filtered.some(s => s.id === currentFrom) ? currentFrom : filtered[0].id;
+      toSel.value = filtered.some(s => s.id === currentTo) ? currentTo : filtered[filtered.length - 1].id;
+
+      if (fromSel.value === toSel.value && filtered.length > 1) {
+        toSel.value = fromSel.value === "DAKA" ? filtered[filtered.length - 1].id : "DAKA";
+      }
+    }
+
+    function swapStations() {
+      const fromSel = document.getElementById("fromStation");
+      const toSel = document.getElementById("toStation");
+      const temp = fromSel.value;
+      fromSel.value = toSel.value;
+      toSel.value = temp;
+      calculateFare();
+    }
+
+    function selectClass(cls) {
+      selectedClass = cls;
+      calculateFare();
+    }
+
+    function updateCount(type, delta) {
+      const next = counts[type] + delta;
+      if (next < 0) return;
+      const totalAfter = counts.adult + counts.child + counts.senior + delta;
+      if (totalAfter < 1) return;
+
+      counts[type] = next;
+      document.getElementById(type + "Count").textContent = counts[type];
+      calculateFare();
+    }
+
+    function clearCustomBase() {
+      document.getElementById("customBaseInput").value = "";
+      calculateFare();
+    }
+
+    function setCustomFareExample(amount) {
+      document.getElementById("customBaseInput").value = amount;
+      calculateFare();
+    }
+
+    /**
+     * অ্যাপ/কাউন্টারের প্রদর্শিত টিকিট ভাড়া (অনলাইন ২০৳ চার্জ ছাড়া) থেকে
+     * মূল ভাড়া (Base), বেডিং ও ভ্যাট আলাদাভাবে ভেঙে বের করা (রিভার্স ফেয়ার ডিকনস্ট্রাকশন)
+     */
+    function deconstructFare(displayFare, seatClass) {
+      if (isNaN(displayFare) || displayFare <= 0) {
+        return { base: 0, bedding: 0, vat: 0, totalWithoutService: 0 };
+      }
+      const meta = CLASS_META[seatClass];
+      const bedding = meta.bedding || 0;
+      const vatRate = meta.vatRate || 0;
+
+      if (vatRate === 0) {
+        const base = Math.max(0, displayFare - bedding);
+        return { base, bedding, vat: 0, totalWithoutService: base + bedding };
+      }
+
+      const targetBaseWithVat = Math.max(0, displayFare - bedding);
+      let cand = Math.round(targetBaseWithVat / (1 + vatRate));
+      let bestBase = cand;
+
+      for (let delta = -3; delta <= 3; delta++) {
+        const testB = cand + delta;
+        if (testB >= 0 && testB + Math.ceil(testB * vatRate - 1e-9) === targetBaseWithVat) {
+          bestBase = testB;
+          break;
+        }
+      }
+
+      const vat = Math.ceil(bestBase * vatRate - 1e-9);
+      return {
+        base: bestBase,
+        bedding,
+        vat,
+        totalWithoutService: bestBase + bedding + vat
+      };
+    }
+
+    /**
+     * প্রাপ্তবয়স্কের মূল ভাড়া (Base Fare) নির্ণয়
+     * স্ক্রিনশট ও অফিসিয়াল ডেটাসেটের সাথে ১০০% নির্ভুল ম্যাচ
+     */
+    function getAdultBaseFare(fromSt, toSt, seatClass, trainId) {
+      if (!fromSt || !toSt || fromSt.id === toSt.id) return 0;
+      const corridor = getActiveCorridor();
+
+      // টার্মিনাল স্টেশন কোড
+      const terminalId = corridor.id === "COXS_BAZAR" ? "COXB" : "BSI";
+
+      // ১. ঢাকা প্রান্ত থেকে বা ঢাকা প্রান্তে যাত্রা
+      if (fromSt.id === "DAKA") {
+        const baseObj = toSt.fromDhakaBase;
+        if (trainId === "722" && baseObj.m722 && baseObj.m722[seatClass]) {
+          return baseObj.m722[seatClass];
+        }
+        return baseObj[seatClass] || 0;
+      }
+      if (toSt.id === "DAKA") {
+        const baseObj = fromSt.fromDhakaBase;
+        if (trainId === "722" && baseObj.m722 && baseObj.m722[seatClass]) {
+          return baseObj.m722[seatClass];
+        }
+        return baseObj[seatClass] || 0;
+      }
+
+      // ২. শেষ টার্মিনাল (কক্সবাজার বা পঞ্চগড়) থেকে বা তাতে যাত্রা
+      if (fromSt.id === terminalId) {
+        const baseObj = toSt.fromTerminalBase;
+        if (trainId === "722" && baseObj.m722 && baseObj.m722[seatClass]) {
+          return baseObj.m722[seatClass];
+        }
+        return baseObj[seatClass] || 0;
+      }
+      if (toSt.id === terminalId) {
+        const baseObj = fromSt.fromTerminalBase;
+        if (trainId === "722" && baseObj.m722 && baseObj.m722[seatClass]) {
+          return baseObj.m722[seatClass];
+        }
+        return baseObj[seatClass] || 0;
+      }
+
+      // ৩. মধ্যবর্তী স্টেশন (যেমন: চট্টগ্রাম ↔ কক্সবাজার বা মধ্যবর্তী অন্য কোনো দুটি স্টেশন)
+      if (corridor.id === "COXS_BAZAR") {
+        // চট্টগ্রাম ↔ কক্সবাজার সেগমেন্ট
+        if ((fromSt.id === "CTG" && toSt.id === "COXB") || (fromSt.id === "COXB" && toSt.id === "CTG")) {
+          return toSt.fromTerminalBase[seatClass] || fromSt.fromTerminalBase[seatClass];
+        }
+      }
+
+      // মধ্যবর্তী দূরত্বের সাধারণ হিসাব (কিলোমিটার ও অনুপাত অনুযায়ী)
+      const dist = Math.abs(toSt.km - fromSt.km);
+      const meta = CLASS_META[seatClass];
+      const sChairBase = Math.max(CLASS_META.S_CHAIR.minBase, roundNearest5(dist * CLASS_META.S_CHAIR.ratePerKm));
+
+      if (seatClass === "S_CHAIR") return sChairBase;
+      if (seatClass === "AC_S") return Math.max(meta.minBase, sChairBase * 2);
+      if (seatClass === "AC_B") return Math.max(meta.minBase, sChairBase * 3);
+      return Math.max(meta.minBase, roundNearest5(dist * meta.ratePerKm));
+    }
+
+    /**
+     * একক যাত্রীর ভাড়া, ভ্যাট, বেডিং ও সার্ভিস চার্জ নির্ণয়
+     */
+    function computeUnitFare(adultBase, seatClass, passengerType, seniorRule = "GAZETTE_5") {
+      if (adultBase <= 0) {
+        return { base: 0, rawDiscounted: 0, vat: 0, rawVat: 0, bedding: 0, fareWithBedding: 0, service: 0, total: 0 };
+      }
+
+      const meta = CLASS_META[seatClass];
+      let base = adultBase;
+      let rawDiscounted = adultBase;
+
+      if (passengerType === "child") {
+        rawDiscounted = Number((adultBase * 0.66).toFixed(2));
+        base = Math.max(meta.minBase, ceilTo5(rawDiscounted));
+      } else if (passengerType === "senior") {
+        if (seniorRule === "GAZETTE_5") {
+          rawDiscounted = Number((adultBase * 0.75).toFixed(2));
+          base = Math.max(meta.minBase, ceilTo5(rawDiscounted));
+        } else if (seniorRule === "GAZETTE_1") {
+          rawDiscounted = Number((adultBase * 0.75).toFixed(2));
+          base = Math.max(meta.minBase, Math.ceil(rawDiscounted - 1e-9));
+        } else {
+          base = adultBase;
+        }
+      }
+
+      const rawVat = Number((base * meta.vatRate).toFixed(2));
+      // বিশেষ কিছু ক্ষেত্রে রেলওয়ে কাউন্টারে পূর্ণ টাকায় ভ্যাট সিলিং হয়
+      const vat = meta.vatRate > 0 ? Math.ceil(rawVat - 1e-9) : 0;
+      const bedding = meta.bedding;
+      const fareWithBedding = base + bedding;
+      const service = 20; // অনলাইন সার্ভিস চার্জ ফ্ল্যাট ২০ টাকা
+      const total = fareWithBedding + vat + service;
+
+      return { base, rawDiscounted, vat, rawVat, bedding, fareWithBedding, service, total };
+    }
+
+    /**
+     * সম্পূর্ণ বুকিংয়ের সমষ্টিগত হিসাব
+     */
+    function computeBookingSummary(adultBase, seatClass, passengerCounts, seniorRule = "GAZETTE_5") {
+      const adultUnit = computeUnitFare(adultBase, seatClass, "adult", seniorRule);
+      const childUnit = computeUnitFare(adultBase, seatClass, "child", seniorRule);
+      const seniorUnit = computeUnitFare(adultBase, seatClass, "senior", seniorRule);
+
+      const nAdult = passengerCounts.adult || 0;
+      const nChild = passengerCounts.child || 0;
+      const nSenior = passengerCounts.senior || 0;
+      const totalSeats = nAdult + nChild + nSenior;
+
+      const totalBaseOnly = (nAdult * adultUnit.base) + (nChild * childUnit.base) + (nSenior * seniorUnit.base);
+      const totalBedding = (nAdult * adultUnit.bedding) + (nChild * childUnit.bedding) + (nSenior * seniorUnit.bedding);
+      const officialFareRow = totalBaseOnly + totalBedding;
+      const totalVat = (nAdult * adultUnit.vat) + (nChild * childUnit.vat) + (nSenior * seniorUnit.vat);
+      const totalService = adultBase > 0 ? totalSeats * 20 : 0;
+      const grandTotal = officialFareRow + totalVat + totalService;
+
+      return {
+        adultUnit,
+        childUnit,
+        seniorUnit,
+        totalSeats,
+        totalBaseOnly,
+        totalBedding,
+        officialFareRow,
+        totalVat,
+        totalService,
+        grandTotal
+      };
+    }
+
+    function calculateFare() {
+      const corridor = getActiveCorridor();
+      const fromId = document.getElementById("fromStation").value;
+      const toId = document.getElementById("toStation").value;
+      const fromSt = corridor.stations.find(s => s.id === fromId);
+      const toSt = corridor.stations.find(s => s.id === toId);
+      const trainId = document.getElementById("trainSelect").value;
+      const seniorRule = document.getElementById("seniorRuleSelect").value;
+
+      // কাস্টম ভাড়া ইনপুট চেক (প্রদর্শিত টিকিট ভাড়া থেকে রিভার্স ব্রেকডাউন)
+      const customVal = parseFloat(document.getElementById("customBaseInput").value);
+      const hasCustomFare = !isNaN(customVal) && customVal > 0;
+      let customDecomp = null;
+      if (hasCustomFare) {
+        customDecomp = deconstructFare(customVal, selectedClass);
+      }
+
+      // বর্তমান ট্রেন অবজেক্ট
+      const currentTrain = corridor.trains.find(t => t.id === trainId);
+
+      // ৪টি ক্লাসের কার্ড আপডেট (সকল ট্রেনের জন্য ৪টি ক্লাসই সবসময় সক্রিয় ও মূল্য প্রদর্শিত থাকবে)
+      Object.keys(CLASS_META).forEach(clsKey => {
+        const btn = document.getElementById("cls-" + clsKey);
+        let rawB = 0;
+        if (hasCustomFare) {
+          const d = deconstructFare(customVal, clsKey);
+          rawB = d.base;
+        } else {
+          rawB = getAdultBaseFare(fromSt, toSt, clsKey, trainId);
+        }
+        const xtrMult = clsKey === "S_CHAIR" ? 1.20 : 1.30;
+        const bFare = isXTRCoach ? Math.ceil(rawB * xtrMult) : rawB;
+        const u = computeUnitFare(bFare, clsKey, "adult", seniorRule);
+
+        const previewEl = document.getElementById("preview-" + clsKey);
+
+        // টিকিটের কাউন্টার ফেয়ার (ভ্যাট+বেডিংসহ, অনলাইন ২০৳ ছাড়া)
+        previewEl.textContent = "৳" + formatBnInt(u.fareWithBedding + u.vat);
+        if (clsKey === selectedClass) {
+          btn.className = "class-card text-left p-3 rounded-xl border-2 border-emerald-600 bg-emerald-50/80 shadow-xs transition relative group cursor-pointer ring-2 ring-emerald-500/20";
+        } else {
+          btn.className = "class-card text-left p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 transition relative group cursor-pointer";
+        }
+      });
+
+      const standardAdultBase = hasCustomFare ? customDecomp.base : getAdultBaseFare(fromSt, toSt, selectedClass, trainId);
+      const xtrMult = selectedClass === "S_CHAIR" ? 1.20 : 1.30;
+      const adultBase = isXTRCoach ? Math.ceil(standardAdultBase * xtrMult) : standardAdultBase;
+      const summary = computeBookingSummary(adultBase, selectedClass, counts, seniorRule);
+
+      // কাস্টম ব্রেকডাউন প্যানেল আপডেট (যখন কাস্টম ভাড়া টাইপ করা থাকবে)
+      const breakdownBox = document.getElementById("customBreakdownBox");
+      if (breakdownBox) {
+        if (hasCustomFare) {
+          breakdownBox.classList.remove("hidden");
+          const { adultUnit, childUnit, seniorUnit } = summary;
+          breakdownBox.innerHTML = `
+            <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200">
+              <div class="font-bold text-emerald-950 flex items-center justify-between text-xs">
+                <span>👨 প্রাপ্তবয়স্ক (Adult)</span>
+                <span class="bg-emerald-600 text-white px-1.5 py-0.5 rounded font-num text-[11px]">৳${formatBnInt(adultUnit.total)}</span>
+              </div>
+              <div class="mt-1 space-y-0.5 text-[11px] text-emerald-900 font-num">
+                <div class="flex justify-between"><span>মূল ভাড়া (Base):</span> <strong>৳${formatBnInt(adultUnit.base)}</strong></div>
+                ${adultUnit.bedding ? `<div class="flex justify-between"><span>বেডিং চার্জ:</span> <strong>৳${formatBnInt(adultUnit.bedding)}</strong></div>` : ''}
+                <div class="flex justify-between"><span>ভ্যাট (${CLASS_META[selectedClass].vatRate > 0 ? '১৫%' : '০%'}):</span> <strong>৳${formatBnInt(adultUnit.vat)}</strong></div>
+                <div class="flex justify-between border-t border-emerald-200 pt-0.5 text-slate-700"><span>কাউন্টার/অ্যাপ ভাড়া:</span> <strong>৳${formatBnInt(adultUnit.fareWithBedding + adultUnit.vat)}</strong></div>
+                <div class="flex justify-between text-emerald-800 font-bold border-t border-emerald-300/60 pt-0.5"><span>+২০৳ অনলাইন মোট:</span> <span>৳${formatBnInt(adultUnit.total)}</span></div>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-lg bg-teal-50 border border-teal-200">
+              <div class="font-bold text-teal-950 flex items-center justify-between text-xs">
+                <span>🧒 শিশু (Child - ৩৪% ছাড়)</span>
+                <span class="bg-teal-600 text-white px-1.5 py-0.5 rounded font-num text-[11px]">৳${formatBnInt(childUnit.total)}</span>
+              </div>
+              <div class="mt-1 space-y-0.5 text-[11px] text-teal-900 font-num">
+                <div class="flex justify-between"><span>মূল ভাড়া (Base):</span> <strong>৳${formatBnInt(childUnit.base)}</strong></div>
+                ${childUnit.bedding ? `<div class="flex justify-between"><span>বেডিং চার্জ:</span> <strong>৳${formatBnInt(childUnit.bedding)}</strong></div>` : ''}
+                <div class="flex justify-between"><span>ভ্যাট (${CLASS_META[selectedClass].vatRate > 0 ? '১৫%' : '০%'}):</span> <strong>৳${formatBnInt(childUnit.vat)}</strong></div>
+                <div class="flex justify-between border-t border-teal-200 pt-0.5 text-slate-700"><span>কাউন্টার/অ্যাপ ভাড়া:</span> <strong>৳${formatBnInt(childUnit.fareWithBedding + childUnit.vat)}</strong></div>
+                <div class="flex justify-between text-teal-800 font-bold border-t border-teal-300/60 pt-0.5"><span>+২০৳ অনলাইন মোট:</span> <span>৳${formatBnInt(childUnit.total)}</span></div>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-lg bg-indigo-50 border border-indigo-200">
+              <div class="font-bold text-indigo-950 flex items-center justify-between text-xs">
+                <span>👴 প্রবীণ (Senior - ২৫% ছাড়)</span>
+                <span class="bg-indigo-600 text-white px-1.5 py-0.5 rounded font-num text-[11px]">৳${formatBnInt(seniorUnit.total)}</span>
+              </div>
+              <div class="mt-1 space-y-0.5 text-[11px] text-indigo-900 font-num">
+                <div class="flex justify-between"><span>মূল ভাড়া (Base):</span> <strong>৳${formatBnInt(seniorUnit.base)}</strong></div>
+                ${seniorUnit.bedding ? `<div class="flex justify-between"><span>বেডিং চার্জ:</span> <strong>৳${formatBnInt(seniorUnit.bedding)}</strong></div>` : ''}
+                <div class="flex justify-between"><span>ভ্যাট (${CLASS_META[selectedClass].vatRate > 0 ? '১৫%' : '০%'}):</span> <strong>৳${formatBnInt(seniorUnit.vat)}</strong></div>
+                <div class="flex justify-between border-t border-indigo-200 pt-0.5 text-slate-700"><span>কাউন্টার/অ্যাপ ভাড়া:</span> <strong>৳${formatBnInt(seniorUnit.fareWithBedding + seniorUnit.vat)}</strong></div>
+                <div class="flex justify-between text-indigo-800 font-bold border-t border-indigo-300/60 pt-0.5"><span>+২০৳ অনলাইন মোট:</span> <span>৳${formatBnInt(seniorUnit.total)}</span></div>
+              </div>
+            </div>
+          `;
+        } else {
+          breakdownBox.classList.add("hidden");
+          breakdownBox.innerHTML = "";
+        }
+      }
+
+      // বাম পাশের কাউন্টারের নিচে একক ভাড়ার বিবরণ
+      const { adultUnit, childUnit, seniorUnit } = summary;
+      document.getElementById("unitTextAdult").textContent =
+        `একক মূল: ৳${formatBnInt(adultUnit.base)}${adultUnit.bedding ? ` + বেডিং: ৳${formatBnInt(adultUnit.bedding)}` : ''} + ভ্যাট: ৳${formatBnInt(adultUnit.vat)} + চার্জ: ৳২০ = ৳${formatBnInt(adultUnit.total)}`;
+      document.getElementById("unitTextChild").textContent =
+        `একক মূল: ৳${formatBnInt(childUnit.base)}${childUnit.bedding ? ` + বেডিং: ৳${formatBnInt(childUnit.bedding)}` : ''} + ভ্যাট: ৳${formatBnInt(childUnit.vat)} + চার্জ: ৳২০ = ৳${formatBnInt(childUnit.total)}`;
+      document.getElementById("unitTextSenior").textContent =
+        `একক মূল: ৳${formatBnInt(seniorUnit.base)}${seniorUnit.bedding ? ` + বেডিং: ৳${formatBnInt(seniorUnit.bedding)}` : ''} + ভ্যাট: ৳${formatBnInt(seniorUnit.vat)} + চার্জ: ৳২০ = ৳${formatBnInt(seniorUnit.total)}`;
+
+      document.getElementById("seniorBadge").textContent =
+        seniorRule === "FULL" ? "০% ছাড় (পূর্ণ ভাড়া)" : "২৫% ছাড়";
+
+      // ট্রেনের নাম ও নম্বর নির্ধারণ (আপ/ডাউন দিক অনুযায়ী)
+      const isDownToDhaka = fromSt && toSt ? fromSt.km > toSt.km : false;
+      let etTrainText = "";
+
+      if (currentTrain) {
+        const no = isDownToDhaka ? currentTrain.noDown : currentTrain.noUp;
+        etTrainText = `${currentTrain.name} [${no}] (${currentTrain.bn})`;
+      } else {
+        etTrainText = "INTERCITY EXPRESS (আন্তঃনগর এক্সপ্রেস)";
+      }
+
+      // ডান কলাম: অফিশিয়াল ই-টিকিট ভিউ আপডেট
+      document.getElementById("etTrainName").textContent = etTrainText;
+      document.getElementById("etFromStation").textContent = fromSt ? `${fromSt.en} (${fromSt.bn})` : "-";
+      document.getElementById("etToStation").textContent = toSt ? `${toSt.en} (${toSt.bn})` : "-";
+      document.getElementById("etClassName").textContent = CLASS_META[selectedClass].etLabel;
+      document.getElementById("etTotalSeats").textContent = `${summary.totalSeats} (${toBnDigits(summary.totalSeats)})`;
+      document.getElementById("etAdultCount").textContent = `${counts.adult} (${toBnDigits(counts.adult)})`;
+      document.getElementById("etSeniorCount").textContent = `${counts.senior} (${toBnDigits(counts.senior)})`;
+      document.getElementById("etChildCount").textContent = `${counts.child} (${toBnDigits(counts.child)})`;
+
+      // কোচের নাম ও আসন আপডেট (GA-04.pdf ফরম্যাট: শুধুমাত্র এসি বাথ ক্লাসের জন্য UP/LOW হবে)
+      const coachEl = document.getElementById("etCoachName");
+      if (coachEl) {
+        const isBerth = selectedClass === "AC_B" || selectedClass === "F_BERTH";
+        const count = summary.totalSeats;
+        if (isXTRCoach) {
+          if (isBerth) {
+            coachEl.textContent = count > 1
+              ? "XTR8-UP-28, XTR8-LOW-29 (এক্সট্রা৮-UP-২৮, এক্সট্রা৮-LOW-২৯)"
+              : "XTR8-UP-28 (এক্সট্রা৮-UP-২৮)";
+          } else {
+            coachEl.textContent = count > 1
+              ? "XTR8-28, XTR8-29 (এক্সট্রা৮-২৮, এক্সট্রা৮-২৯)"
+              : "XTR8-28 (এক্সট্রা৮-২৮)";
+          }
+        } else {
+          if (isBerth) {
+            coachEl.textContent = count > 1
+              ? "GA-UP-4, GA-LOW-5 (গ-UP-৪, গ-LOW-৫)"
+              : "GA-UP-4 (গ-UP-৪)";
+          } else {
+            coachEl.textContent = count > 1
+              ? "GA-4, GA-5 (গ-৪, গ-৫)"
+              : "GA-4 (গ-৪)";
+          }
+        }
+      }
+
+      document.getElementById("etFare").textContent =
+        `BDT ${formatEnCurrency(summary.officialFareRow)} (${formatBnCurrency(summary.officialFareRow)} টাকা)`;
+      document.getElementById("etVat").textContent =
+        `BDT ${formatEnCurrency(summary.totalVat)} (${formatBnCurrency(summary.totalVat)} টাকা)`;
+      document.getElementById("etService").textContent =
+        `BDT ${formatEnCurrency(summary.totalService)} (${formatBnCurrency(summary.totalService)} টাকা)`;
+      document.getElementById("etTotalFare").textContent =
+        `BDT ${formatEnCurrency(summary.grandTotal)} (${formatBnCurrency(summary.grandTotal)} টাকা)`;
+
+      document.getElementById("seatLimitAlert").classList.toggle("hidden", summary.totalSeats <= 4);
+      document.getElementById("routeBadgeText").textContent =
+        fromSt && toSt ? `${fromSt.bn.replace(/_/g, ' ')} ➔ ${toSt.bn.replace(/_/g, ' ')}` : "-";
+
+      // গ্র্যানুলার টেবিল আপডেট
+      const tbody = document.getElementById("granularTableBody");
+      const tfoot = document.getElementById("granularTableFoot");
+      tbody.innerHTML = "";
+
+      const rows = [
+        { label: "প্রাপ্তবয়স্ক (Adult)", count: counts.adult, unit: adultUnit },
+        { label: "শিশু (Child - ৩৪% ছাড়)", count: counts.child, unit: childUnit },
+        { label: "প্রবীণ নাগরিক (Senior)", count: counts.senior, unit: seniorUnit }
+      ];
+
+      rows.forEach(r => {
+        if (r.count > 0) {
+          const rBase = r.unit.base * r.count;
+          const rBed = r.unit.bedding * r.count;
+          const rVat = r.unit.vat * r.count;
+          const rSrv = (adultBase > 0 ? 20 : 0) * r.count;
+          const rTot = rBase + rBed + rVat + rSrv;
+
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-50";
+          tr.innerHTML = `
+            <td class="py-2.5 px-3 font-semibold text-slate-800">
+              ${r.label} <span class="text-emerald-700 font-bold">× ${formatBnInt(r.count)} জন</span>
+              <div class="text-[11px] font-normal text-slate-500">একক মূল: ৳${formatBnInt(r.unit.base)} | একক ভ্যাট: ৳${formatBnInt(r.unit.vat)}</div>
+            </td>
+            <td class="py-2.5 px-3 text-right">৳${formatBnInt(rBase)}</td>
+            <td class="py-2.5 px-3 text-right">৳${formatBnInt(rBed)}</td>
+            <td class="py-2.5 px-3 text-right">৳${formatBnInt(rVat)}</td>
+            <td class="py-2.5 px-3 text-right">৳${formatBnInt(rSrv)}</td>
+            <td class="py-2.5 px-3 text-right font-bold text-slate-900">৳${formatBnInt(rTot)}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      });
+
+      tfoot.innerHTML = `
+        <tr>
+          <td class="py-3 px-3">সর্বমোট (${formatBnInt(summary.totalSeats)}টি আসন)</td>
+          <td class="py-3 px-3 text-right">৳${formatBnInt(summary.totalBaseOnly)}</td>
+          <td class="py-3 px-3 text-right">৳${formatBnInt(summary.totalBedding)}</td>
+          <td class="py-3 px-3 text-right">৳${formatBnInt(summary.totalVat)}</td>
+          <td class="py-3 px-3 text-right">৳${formatBnInt(summary.totalService)}</td>
+          <td class="py-3 px-3 text-right text-emerald-900 text-base">৳${formatBnInt(summary.grandTotal)}</td>
+        </tr>
+      `;
+
+      // ফর্মুলা লগ
+      const logs = [];
+      if (adultBase <= 0) {
+        logs.push(`<div class="text-amber-400">⚠️ প্রারম্ভিক ও গন্তব্য স্টেশন একই হওয়ায় ভাড়া ০ টাকা। অনুগ্রহ করে দুটি ভিন্ন স্টেশন নির্বাচন করুন।</div>`);
+      } else {
+        if (hasCustomFare) {
+          logs.push(`<div class="text-emerald-300 font-bold bg-emerald-950/60 p-2 rounded-lg border border-emerald-500/40">🔍 কাস্টম টিকিট ভাড়া ডিকনস্ট্রাকশন: কাউন্টার/অ্যাপে প্রদর্শিত BDT ${customVal} কে ভেঙে পাওয়া গেছে ➔ মূল ভাড়া (Base): BDT ${customDecomp.base}${customDecomp.bedding > 0 ? ` + বেডিং: BDT ${customDecomp.bedding}` : ''}${customDecomp.vat > 0 ? ` + ভ্যাট (১৫%): BDT ${customDecomp.vat}` : ''} = BDT ${customVal} (+ প্রতি আসনে ২০৳ সার্ভিস চার্জ)</div>`);
+        }
+        if (isXTRCoach) {
+          const pct = selectedClass === "S_CHAIR" ? "২০%" : "৩০%";
+          const mult = selectedClass === "S_CHAIR" ? "1.20" : "1.30";
+          logs.push(`<div class="text-amber-300 font-bold bg-amber-950/60 p-2 rounded-lg border border-amber-500/40">⚡ এক্সট্রা বগি (XTR Coach): ${selectedClass === "S_CHAIR" ? "শোভন চেয়ারে ২০% সারচার্জ" : "এসি ক্লাসে ৩০% সারচার্জ"} প্রয়োগ করা হয়েছে (Standard Base: BDT ${standardAdultBase} × ${mult} ➔ BDT ${adultBase})</div>`);
+        }
+        logs.push(`<div>১. <strong>প্রাপ্তবয়স্ক একক মূল ভাড়া (Adult Base):</strong> <code>BDT ${adultUnit.base}</code> ${counts.adult > 0 ? `(× ${counts.adult} জন = <code>BDT ${adultUnit.base * counts.adult}</code>)` : ''}</div>`);
+        if (counts.child > 0) {
+          logs.push(`<div>২. <strong>শিশু একক মূল ভাড়া (৩৪% ছাড়):</strong> <code>${adultUnit.base} × 0.66 = ${childUnit.rawDiscounted}</code> ➔ সিলিং (Ceil to 5) = <code>BDT ${childUnit.base}</code> (× ${counts.child} জন = <code>BDT ${childUnit.base * counts.child}</code>)</div>`);
+        }
+        if (counts.senior > 0) {
+          logs.push(`<div>৩. <strong>প্রবীণ একক মূল ভাড়া:</strong> <code>${adultUnit.base} × ${seniorRule === 'FULL' ? '1.00' : '0.75'} = ${seniorUnit.rawDiscounted}</code> ➔ রাউন্ডিং = <code>BDT ${seniorUnit.base}</code> (× ${counts.senior} জন = <code>BDT ${seniorUnit.base * counts.senior}</code>)</div>`);
+        }
+        if (summary.totalBedding > 0) {
+          logs.push(`<div>৪. <strong>বেডিং চার্জ (AC_B):</strong> জনপ্রতি <code>BDT 50</code> × ${summary.totalSeats} সিট = <code>BDT ${summary.totalBedding}</code> (ভ্যাটমুক্ত, মূল ভাড়ার সাথে অন্তর্ভুক্ত)</div>`);
+        }
+        logs.push(`<div>• <strong>অফিশিয়াল টিকিটের Fare (ভাড়া) সারি:</strong> <code>${summary.totalBaseOnly}${summary.totalBedding > 0 ? ' + ' + summary.totalBedding : ''} = BDT ${formatEnCurrency(summary.officialFareRow)}</code></div>`);
+
+        if (CLASS_META[selectedClass].vatRate > 0) {
+          const vatParts = [];
+          if (counts.adult > 0) vatParts.push(`Adult: ⌈${adultUnit.base} × 0.15⌉ = ⌈${adultUnit.rawVat}⌉ = ${adultUnit.vat} × ${counts.adult} = ${adultUnit.vat * counts.adult}`);
+          if (counts.child > 0) vatParts.push(`Child: ⌈${childUnit.base} × 0.15⌉ = ⌈${childUnit.rawVat}⌉ = ${childUnit.vat} × ${counts.child} = ${childUnit.vat * counts.child}`);
+          if (counts.senior > 0) vatParts.push(`Senior: ⌈${seniorUnit.base} × 0.15⌉ = ⌈${seniorUnit.rawVat}⌉ = ${seniorUnit.vat} × ${counts.senior} = ${seniorUnit.vat * counts.senior}`);
+          logs.push(`<div>• <strong>একক টিকিটভিত্তিক ১৫% ভ্যাট (Per-Seat VAT):</strong> ${vatParts.join(' | ')} ➔ মোট ভ্যাট = <code>BDT ${formatEnCurrency(summary.totalVat)}</code></div>`);
+        } else {
+          logs.push(`<div>• <strong>ভ্যাট (VAT):</strong> শোভন চেয়ার (S_CHAIR) নন-এসি হওয়ায় ভ্যাট <code>BDT 0.00</code></div>`);
+        }
+
+        logs.push(`<div>• <strong>অনলাইন গেটওয়ে সার্ভিস চার্জ:</strong> <code>${summary.totalSeats} সিট × 20 = BDT ${formatEnCurrency(summary.totalService)}</code> ➔ <strong>সর্বমোট (Total Fare) = <code>BDT ${formatEnCurrency(summary.grandTotal)}</code></strong></div>`);
+      }
+
+      document.getElementById("formulaInspectorContent").innerHTML = logs.join("");
+    }
+
+    function applyPreset(presetKey) {
+      document.getElementById("customBaseInput").value = "";
+
+      // ডিফল্টভাবে XTR টগল রিসেট
+      isXTRCoach = false;
+      const xtrEl = document.getElementById("xtrToggle");
+      if (xtrEl) xtrEl.checked = false;
+
+      if (presetKey === "COXB_XTR_TICKET") {
+        selectCorridor("COXS_BAZAR", false);
+        document.getElementById("trainSelect").value = "814";
+        handleTrainSelectChange();
+        populateStations("COXB", "DAKA");
+        selectedClass = "AC_S";
+        counts = { adult: 1, child: 1, senior: 0 };
+        isXTRCoach = true;
+        if (xtrEl) xtrEl.checked = true;
+      } else if (presetKey === "COXB_XTR_SNIGDHA") {
+        selectCorridor("COXS_BAZAR", false);
+        document.getElementById("trainSelect").value = "814";
+        handleTrainSelectChange();
+        populateStations("DAKA", "COXB");
+        selectedClass = "SNIGDHA";
+        counts = { adult: 1, child: 0, senior: 0 };
+        isXTRCoach = true;
+        if (xtrEl) xtrEl.checked = true;
+      } else if (presetKey === "COXB_XTR_SCHAIR") {
+        selectCorridor("COXS_BAZAR", false);
+        document.getElementById("trainSelect").value = "814";
+        handleTrainSelectChange();
+        populateStations("DAKA", "COXB");
+        selectedClass = "S_CHAIR";
+        counts = { adult: 1, child: 0, senior: 0 };
+        isXTRCoach = true;
+        if (xtrEl) xtrEl.checked = true;
+      } else if (presetKey === "COXB_PARJOTAK_ACS") {
+        selectCorridor("COXS_BAZAR", false);
+        document.getElementById("trainSelect").value = "816";
+        handleTrainSelectChange();
+        populateStations("DAKA", "COXB");
+        selectedClass = "AC_S";
+        counts = { adult: 1, child: 0, senior: 0 };
+      } else if (presetKey === "COXB_EXPRESS_ACB") {
+        selectCorridor("COXS_BAZAR", false);
+        document.getElementById("trainSelect").value = "814";
+        handleTrainSelectChange();
+        populateStations("DAKA", "COXB");
+        selectedClass = "AC_B";
+        counts = { adult: 1, child: 0, senior: 0 };
+      } else if (presetKey === "COXB_MOHANAGAR_SCHAIR") {
+        selectCorridor("COXS_BAZAR", false);
+        document.getElementById("trainSelect").value = "722";
+        handleTrainSelectChange();
+        populateStations("DAKA", "COXB");
+        selectedClass = "S_CHAIR";
+        counts = { adult: 1, child: 0, senior: 0 };
+      } else if (presetKey === "CTG_COXB_SCHAIR") {
+        selectCorridor("COXS_BAZAR", false);
+        document.getElementById("trainSelect").value = "816";
+        handleTrainSelectChange();
+        populateStations("CTG", "COXB");
+        selectedClass = "S_CHAIR";
+        counts = { adult: 1, child: 0, senior: 0 };
+      } else if (presetKey === "THAKURGAON_TICKET") {
+        selectCorridor("PANCHAGARH", false);
+        document.getElementById("trainSelect").value = "757";
+        handleTrainSelectChange();
+        populateStations("TKR", "DAKA");
+        selectedClass = "AC_S";
+        counts = { adult: 3, child: 1, senior: 0 };
+      } else if (presetKey === "DHAKA_PANCH_SNIGDHA") {
+        selectCorridor("PANCHAGARH", false);
+        document.getElementById("trainSelect").value = "793";
+        handleTrainSelectChange();
+        populateStations("DAKA", "BSI");
+        selectedClass = "SNIGDHA";
+        counts = { adult: 1, child: 1, senior: 0 };
+      }
+
+      document.getElementById("adultCount").textContent = counts.adult;
+      document.getElementById("childCount").textContent = counts.child;
+      document.getElementById("seniorCount").textContent = counts.senior;
+      calculateFare();
+    }
+
+    function resetToDefault() {
+      applyPreset("COXB_PARJOTAK_ACS");
+    }
+
+    function loadStationFromChart(stationId) {
+      document.getElementById("trainSelect").value = "ALL";
+      populateStations("DAKA", stationId);
+      calculateFare();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderFullChart() {
+      const corridor = getActiveCorridor();
+      const query = (document.getElementById("stationSearchInput").value || "").trim().toLowerCase();
+      const tbody = document.getElementById("fullChartBody");
+      tbody.innerHTML = "";
+
+      corridor.stations.slice(1).forEach((st, idx) => {
+        if (query && !st.bn.toLowerCase().includes(query) && !st.en.toLowerCase().includes(query)) {
+          return;
+        }
+
+        const sChair = computeUnitFare(st.fromDhakaBase.S_CHAIR, "S_CHAIR", "adult");
+        const snigdha = computeUnitFare(st.fromDhakaBase.SNIGDHA, "SNIGDHA", "adult");
+        const acs = computeUnitFare(st.fromDhakaBase.AC_S, "AC_S", "adult");
+        const acb = computeUnitFare(st.fromDhakaBase.AC_B, "AC_B", "adult");
+
+        const trainBadges = st.trains.map(t => {
+          if (t === "816") return `<span class="inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-teal-100 text-teal-800">পর্যটক</span>`;
+          if (t === "814") return `<span class="inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-indigo-100 text-indigo-800">কক্সবাজার</span>`;
+          if (t === "722") return `<span class="inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-100 text-amber-900">মহানগর</span>`;
+          if (t === "705") return `<span class="inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-blue-100 text-blue-800">একতা</span>`;
+          if (t === "757") return `<span class="inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-100 text-amber-900">দ্রুতযান</span>`;
+          return `<span class="inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-pink-100 text-pink-800">পঞ্চগড়</span>`;
+        }).join(" ");
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-emerald-50/50 transition";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 text-center font-num text-slate-500">${formatBnInt(idx + 1)}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-800">
+            ${st.bn.replace(/_/g, ' ')}
+            <div class="text-[11px] font-normal text-slate-400">${st.en.replace(/_/g, ' ')}</div>
+          </td>
+          <td class="py-2.5 px-3 text-center space-x-0.5">${trainBadges}</td>
+          <td class="py-2.5 px-3 text-right font-num">
+            <span class="font-bold text-slate-900">৳${formatBnInt(sChair.fareWithBedding)}</span>
+          </td>
+          <td class="py-2.5 px-3 text-right font-num">
+            <span class="font-bold text-slate-900">৳${formatBnInt(snigdha.fareWithBedding + snigdha.vat)}</span>
+            <div class="text-[11px] text-slate-500">মূল ৳${formatBnInt(snigdha.base)} + ভ্যাট ৳${formatBnInt(snigdha.vat)}</div>
+          </td>
+          <td class="py-2.5 px-3 text-right font-num">
+            <span class="font-bold text-slate-900">${acs.fareWithBedding > 0 ? '৳' + formatBnInt(acs.fareWithBedding + acs.vat) : '—'}</span>
+            ${acs.fareWithBedding > 0 ? `<div class="text-[11px] text-slate-500">মূল ৳${formatBnInt(acs.base)} + ভ্যাট ৳${formatBnInt(acs.vat)}</div>` : ''}
+          </td>
+          <td class="py-2.5 px-3 text-right font-num">
+            <span class="font-bold text-slate-900">${acb.fareWithBedding > 0 ? '৳' + formatBnInt(acb.fareWithBedding + acb.vat) : '—'}</span>
+            ${acb.fareWithBedding > 0 ? `<div class="text-[11px] text-slate-500">মূল ৳${formatBnInt(acb.base)} + ভ্যাট ৳${formatBnInt(acb.vat)} + ৫০৳</div>` : ''}
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <button onclick="loadStationFromChart('${st.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-800 hover:text-white border border-emerald-200 text-xs font-semibold transition cursor-pointer">
+              হিসাব করুন
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /**
+     * স্বয়ংক্রিয় টেস্ট স্যুট (Automated QA Suite)
+     * উভয় করিডোর ও ইউজার স্ক্রিনশটের ৮টি টেস্ট ভেরিফিকেশন
+     */
+    function runFareTests() {
+      // পঞ্চগড় স্টেশন
+      const tkr = CORRIDORS.PANCHAGARH.stations.find(s => s.id === "TKR");
+      const dakaP = CORRIDORS.PANCHAGARH.stations.find(s => s.id === "DAKA");
+      const bsi = CORRIDORS.PANCHAGARH.stations.find(s => s.id === "BSI");
+      const dgp = CORRIDORS.PANCHAGARH.stations.find(s => s.id === "DGP");
+
+      // কক্সবাজার স্টেশন
+      const dakaC = CORRIDORS.COXS_BAZAR.stations.find(s => s.id === "DAKA");
+      const coxb = CORRIDORS.COXS_BAZAR.stations.find(s => s.id === "COXB");
+      const ctg = CORRIDORS.COXS_BAZAR.stations.find(s => s.id === "CTG");
+
+      const testCases = [
+        {
+          name: "টেস্ট ১ (স্ক্রিনশট ১): ঢাকা ➔ কক্সবাজার | পর্যটক এক্সপ্রেস [816] | AC_S (৳১,৭২৮ + ২০৳)",
+          summary: computeBookingSummary(1502, "AC_S", { adult: 1, child: 0, senior: 0 }),
+          expected: { officialFareRow: 1502, totalVat: 226, totalService: 20, grandTotal: 1748 }
+        },
+        {
+          name: "টেস্ট ২ (স্ক্রিনশট ২): ঢাকা ➔ কক্সবাজার | পর্যটক এক্সপ্রেস [816] | SNIGDHA (৳১,৪৪৩ + ২০৳)",
+          summary: computeBookingSummary(1254, "SNIGDHA", { adult: 1, child: 0, senior: 0 }),
+          expected: { officialFareRow: 1254, totalVat: 189, totalService: 20, grandTotal: 1463 }
+        },
+        {
+          name: "টেস্ট ৩ (স্ক্রিনশট ৩): ঢাকা ➔ কক্সবাজার | পর্যটক / কক্সবাজার এক্স. | S_CHAIR (৳৭৫৪ + ২০৳)",
+          summary: computeBookingSummary(754, "S_CHAIR", { adult: 1, child: 0, senior: 0 }),
+          expected: { officialFareRow: 754, totalVat: 0, totalService: 20, grandTotal: 774 }
+        },
+        {
+          name: "টেস্ট ৪ (স্ক্রিনশট ৪): ঢাকা ➔ কক্সবাজার | মহানগর এক্সপ্রেস [722] | S_CHAIR (৳৬৮৫ + ২০৳)",
+          summary: computeBookingSummary(685, "S_CHAIR", { adult: 1, child: 0, senior: 0 }),
+          expected: { officialFareRow: 685, totalVat: 0, totalService: 20, grandTotal: 705 }
+        },
+        {
+          name: "টেস্ট ৫ (স্ক্রিনশট ৫): ঢাকা ➔ কক্সবাজার | মহানগর এক্সপ্রেস [722] | AC_B (৳২,৪০৮ + ২০৳)",
+          summary: computeBookingSummary(2050, "AC_B", { adult: 1, child: 0, senior: 0 }),
+          expected: { officialFareRow: 2100, totalVat: 308, totalService: 20, grandTotal: 2428 }
+        },
+        {
+          name: "টেস্ট ৬ (স্ক্রিনশট ৬): ঢাকা ➔ কক্সবাজার | কক্সবাজার এক্সপ্রেস [814] | AC_B (৳২,৬৪৪ + ২০৳)",
+          summary: computeBookingSummary(2255, "AC_B", { adult: 1, child: 0, senior: 0 }),
+          expected: { officialFareRow: 2305, totalVat: 339, totalService: 20, grandTotal: 2664 }
+        },
+        {
+          name: "টেস্ট ৭ (আসল টিকিট): ঠাকুরগাঁও রোড ➔ ঢাকা | দ্রুতযান | AC_S | ৩ Adult + ১ Child",
+          summary: computeBookingSummary(1390, "AC_S", { adult: 3, child: 1, senior: 0 }),
+          expected: { officialFareRow: 5090, totalVat: 765, totalService: 80, grandTotal: 5935 }
+        },
+        {
+          name: "টেস্ট ৮ (সেগমেন্ট ফেয়ার): চট্টগ্রাম ➔ কক্সবাজার | S_CHAIR | ১ Adult (৳২৫০ + ২০৳ = ৳২৭০)",
+          summary: computeBookingSummary(250, "S_CHAIR", { adult: 1, child: 0, senior: 0 }),
+          expected: { officialFareRow: 250, totalVat: 0, totalService: 20, grandTotal: 270 }
+        },
+        {
+          name: "টেস্ট ৯ (আপনার আসল এক্সট্রা বগি টিকিট): কক্সবাজার ➔ ঢাকা | কক্সবাজার এক্সপ্রেস [813] | AC_S (কোচ XTR8) | ১ Adult + ১ Child (৩০% সারচার্জ)",
+          summary: computeBookingSummary(Math.ceil(1502 * 1.30), "AC_S", { adult: 1, child: 1, senior: 0 }),
+          expected: { officialFareRow: 3243, totalVat: 487, totalService: 40, grandTotal: 3770 }
+        },
+        {
+          name: "টেস্ট ১০ (আপনার স্ক্রিনশট এক্সট্রা বগি স্নিগ্ধা): ঢাকা ➔ কক্সবাজার | কক্সবাজার এক্সপ্রেস [814] | SNIGDHA (কোচ XTR2) | ১ Adult = ৳১,৮৯৬ (ভাড়া ১৬৩১ + ভ্যাট ২৪৫ + ২০৳ চার্জ)",
+          summary: computeBookingSummary(Math.ceil(1254 * 1.30), "SNIGDHA", { adult: 1, child: 0, senior: 0 }),
+          expected: { officialFareRow: 1631, totalVat: 245, totalService: 20, grandTotal: 1896 }
+        },
+        {
+          name: "টেস্ট ১১ (এক্সট্রা বগি শোভন চেয়ার - ২০% সারচার্জ): ঢাকা ➔ কক্সবাজার | কক্সবাজার এক্সপ্রেস [814] | S_CHAIR (কোচ XTR) | ১ Adult = ৳৯২৫ (মূল ৯০৫ + ২০৳ চার্জ)",
+          summary: computeBookingSummary(Math.ceil(754 * 1.20), "S_CHAIR", { adult: 1, child: 0, senior: 0 }),
+          expected: { officialFareRow: 905, totalVat: 0, totalService: 20, grandTotal: 925 }
+        }
+      ];
+
+      let passedCount = 0;
+      const listEl = document.getElementById("testResultsList");
+      listEl.innerHTML = "";
+
+      testCases.forEach(tc => {
+        const s = tc.summary;
+        const e = tc.expected;
+        const pass =
+          s.officialFareRow === e.officialFareRow &&
+          s.totalVat === e.totalVat &&
+          s.totalService === e.totalService &&
+          s.grandTotal === e.grandTotal;
+
+        if (pass) passedCount++;
+
+        const div = document.createElement("div");
+        div.className = `p-3 rounded-xl border text-xs ${pass ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950' : 'bg-red-50 border-red-200 text-red-900'}`;
+        div.innerHTML = `
+          <div class="font-bold flex items-center justify-between">
+            <span>${tc.name}</span>
+            <span class="px-2 py-0.5 rounded-full text-[11px] ${pass ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}">${pass ? 'PASSED' : 'FAILED'}</span>
+          </div>
+          <div class="mt-1 font-num text-slate-600">
+            ফলাফল: Fare = <strong>BDT ${s.officialFareRow}.00</strong> | VAT = <strong>BDT ${s.totalVat}.00</strong> | Service = <strong>BDT ${s.totalService}.00</strong> | Total = <strong>BDT ${s.grandTotal}.00</strong>
+          </div>
+        `;
+        listEl.appendChild(div);
+      });
+
+      document.getElementById("testStatusText").textContent =
+        `অটো-টেস্ট যাচাইকৃত (${toBnDigits(passedCount)}/${toBnDigits(testCases.length)} পাস)`;
+    }
+
+    function toggleTestModal() {
+      const modal = document.getElementById("testModal");
+      modal.classList.toggle("hidden");
+      modal.classList.toggle("flex");
+    }
+
+    function copySummaryToClipboard() {
+      const train = document.getElementById("etTrainName").textContent;
+      const from = document.getElementById("etFromStation").textContent;
+      const to = document.getElementById("etToStation").textContent;
+      const cls = document.getElementById("etClassName").textContent;
+      const seats = document.getElementById("etTotalSeats").textContent;
+      const fare = document.getElementById("etFare").textContent;
+      const vat = document.getElementById("etVat").textContent;
+      const srv = document.getElementById("etService").textContent;
+      const tot = document.getElementById("etTotalFare").textContent;
+
+      const text = [
+        "=== বাংলাদেশ রেলওয়ে ই-টিকিট ভাড়ার হিসাব ===",
+        `ট্রেন: ${train}`,
+        `প্রারম্ভিক স্টেশন: ${from}`,
+        `গন্তব্য স্টেশন: ${to}`,
+        `শ্রেণি: ${cls}`,
+        `মোট আসন: ${seats}`,
+        `Fare (ভাড়া): ${fare}`,
+        `VAT (ভ্যাট): ${vat}`,
+        `Service Charge (সেবা খরচ): ${srv}`,
+        `Total Fare (মোট ভাড়া): ${tot}`
+      ].join("\n");
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      const toast = document.getElementById("toastBox");
+      toast.classList.remove("opacity-0", "translate-y-2");
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-2");
+      }, 2200);
+    }
+
+    window.onload = function () {
+      selectCorridor("COXS_BAZAR", true);
+      runFareTests();
+    };
+  </script>
+</body>
+</html>
