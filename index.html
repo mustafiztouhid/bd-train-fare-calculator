@@ -208,16 +208,6 @@
                 <select id="toStation" onchange="calculateFare()" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 outline-none transition"></select>
               </div>
             </div>
-
-            <!-- জনপ্রিয় স্টেশনগুলোর কুইক চিপস বাটন -->
-            <div>
-              <div class="text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
-                <span>📍</span> দ্রুত স্টেশন সেট করুন (Quick Chips):
-              </div>
-              <div class="flex items-center gap-1.5 flex-wrap" id="quickStationChips">
-                <!-- JS dynamically adds quick chips based on corridor -->
-              </div>
-            </div>
           </div>
 
           <!-- ৪. আসন শ্রেণি (Seat Class) -->
@@ -293,9 +283,6 @@
                   <span class="text-xs sm:text-sm font-bold text-amber-950">এক্সট্রা বগি (XTR Coach)</span>
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">S_CHAIR +২০% | এসি +৩০%</span>
                 </div>
-                <p class="text-[11px] text-amber-800/90 mt-0.5 leading-tight">
-                  ঈদ বা পিক টাইমে অতিরিক্ত কোচে শোভন চেয়ারে ২০% এবং এসি ক্লাসে ৩০% বেশি নেওয়া হয়
-                </p>
               </div>
             </div>
             <label class="relative inline-flex items-center cursor-pointer shrink-0">
@@ -345,29 +332,20 @@
               </div>
 
               <!-- Senior Citizen Counter -->
-              <div class="bg-white p-3 rounded-xl border border-slate-200/80 flex flex-col gap-2 shadow-2xs">
-                <div class="flex items-center justify-between gap-2">
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <span class="font-bold text-sm text-slate-900">প্রবীণ নাগরিক (Senior: ৬৫+)</span>
-                      <span class="text-[11px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-semibold" id="seniorBadge">২৫% ছাড়</span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-0.5" id="unitTextSenior">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
+              <div class="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-slate-900">প্রবীণ নাগরিক (Senior: ৬৫+)</span>
+                    <span class="text-[11px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-semibold" id="seniorBadge">২৫% ছাড়</span>
                   </div>
-                  <div class="flex items-center gap-2 shrink-0">
-                    <button type="button" onclick="updateCount('senior', -1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
-                    <span id="seniorCount" class="w-7 text-center font-bold text-base font-num text-slate-900">0</span>
-                    <button type="button" onclick="updateCount('senior', 1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
-                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5" id="unitTextSenior">মূল ভাড়া: ৳০ + ভ্যাট: ৳০ + চার্জ: ৳২০</p>
                 </div>
-                <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
-                  <span class="text-slate-600 font-medium">প্রবীণদের ছাড়ের নিয়ম:</span>
-                  <select id="seniorRuleSelect" onchange="calculateFare()" class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-600">
-                    <option value="GAZETTE_5">২৫% ছাড় (পরবর্তী ৫ টাকার গুণিতকে)</option>
-                    <option value="GAZETTE_1">২৫% ছাড় (পরবর্তী পূর্ণ টাকায়)</option>
-                    <option value="FULL">সাধারণ Adult ভাড়া (০% ছাড়)</option>
-                  </select>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button type="button" onclick="updateCount('senior', -1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">−</button>
+                  <span id="seniorCount" class="w-7 text-center font-bold text-base font-num text-slate-900">0</span>
+                  <button type="button" onclick="updateCount('senior', 1)" class="w-8 h-8 rounded-lg border border-slate-300 hover:border-emerald-600 bg-slate-50 hover:bg-emerald-600 text-slate-700 hover:text-white font-bold text-lg flex items-center justify-center transition active:scale-95 cursor-pointer">+</button>
                 </div>
+                <input type="hidden" id="seniorRuleSelect" value="GAZETTE_5">
               </div>
             </div>
           </div>
@@ -1060,8 +1038,9 @@
     }
 
     function renderQuickStationChips() {
-      const corridor = getActiveCorridor();
       const container = document.getElementById("quickStationChips");
+      if (!container) return;
+      const corridor = getActiveCorridor();
       container.innerHTML = "";
 
       corridor.quickChips.forEach(chip => {
@@ -1326,7 +1305,8 @@
       const fromSt = corridor.stations.find(s => s.id === fromId);
       const toSt = corridor.stations.find(s => s.id === toId);
       const trainId = document.getElementById("trainSelect").value;
-      const seniorRule = document.getElementById("seniorRuleSelect").value;
+      const seniorRuleElem = document.getElementById("seniorRuleSelect");
+      const seniorRule = seniorRuleElem ? seniorRuleElem.value : "GAZETTE_5";
 
       // কাস্টম ভাড়া ইনপুট চেক (প্রদর্শিত টিকিট ভাড়া থেকে রিভার্স ব্রেকডাউন)
       const customVal = parseFloat(document.getElementById("customBaseInput").value);
